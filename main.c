@@ -25,9 +25,11 @@ struct Node* createNodeRand(){
 };
 
 
-void RandNode(struct Node** headRef, int N){//Fill our Node with random values, using push way of adding elements
+void RandNode(struct Node** headRef, int N){//Fill our Node with random values, using shift way of adding elements
     for(int i = 0; i < N; i++){
         struct Node* newNode = createNodeRand();
+        newNode->next = *headRef;
+        *headRef = newNode;
     }
 }
 
@@ -126,16 +128,31 @@ void printList(struct Node* head) {
     while (current != NULL) {
         printf("%d ", current->data);
         current = current->next;
-    }
-    printf("\n");
+    };
 }
 
 
 int main() {
     struct Node* head = NULL;
-    bool work = true;
-    int option;
+    int work = 1;
+    int option, N, value;
+/*
+    Shift(&head, 1);
+    Shift(&head, 3);
+    Shift(&head, 7);
+    Shift(&head, 199);
+*/
+    RandNode(&head, 10);
+    printList(head);
+    Shift(&head, 0);
+    printf("\n");
+    RandNode(&head, 2);
+    printList(head);
+    printf("\n");
+    BubbleSort2(&head);
+    printList(head);
 
+/*
     while(work){
         printf("1- Input N and fill Node with N amount of random numbers\n");
         printf("2- Input value to insert at the end of Node\n");
@@ -145,18 +162,34 @@ int main() {
         printf("6- Clear our Node\n");
         printf("7- Delete element with certain value (will delete first element with this value in Node)\n\n");
 
-        printf("0- Stop program");
+        printf("0- Stop program\n");
         scanf("%d", &option);
-        clrscr();
+        system("@cls||clear");
 
         switch(option){
             case 1:
-                int N;
                 printf("Input N:");
                 scanf("%d", &N);
-
+                RandNode(&head, N);
+                break;
+            case 2:
+                printf("Input value:\n");
+                scanf("%d", &value);
+                Push(&head, value);
+                break;
+            case 3:
+                printf("Input value:\n");
+                scanf("%d", &value);
+                Shift(head, value);
+                break;
+            case 4:
+                printList(head);
+                break;
+            case 0:
+                printf("Programme ended");
+                work = 0;
         }
     }
-
+*/
     return 0;
 }
