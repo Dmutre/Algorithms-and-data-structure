@@ -123,12 +123,40 @@ void BubbleSort2(struct Node** headRef) {//From bigger to lower
 }
 
 
-void printList(struct Node* head) {
-    struct Node* current = head;
+void InsertionSort(struct Node** headRef) {
+    if (*headRef == NULL) {
+        return; // List is empty
+    }
+    struct Node* sortedList = *headRef;
+    *headRef = *headRef->next;
+    sortedList->next = NULL;
+    while (*headRef != NULL) {
+        struct Node* current = *headRef;
+        *headRef = (*headRef)->next;
+        if (current->data > sortedList->data) {
+            // Insert the new node at the beginning of the sorted list
+            current->next = sortedList;
+            sortedList = current;
+        } else {
+            // Find the correct position to insert the new node
+            struct Node* temp = sortedList;
+            while (temp->next != NULL && current->data <= temp->next->data) {
+                temp = temp->next;
+            }
+            current->next = temp->next;
+            temp->next = current;
+        }
+    }
+    *headRef = sortedList;
+}
+
+void printList(struct Node* headRef) {
+    struct Node* current = headRef;
     while (current != NULL) {
         printf("%d ", current->data);
         current = current->next;
     };
+    printf("\n");
 }
 
 
@@ -144,12 +172,7 @@ int main() {
 */
     RandNode(&head, 10);
     printList(head);
-    Shift(&head, 0);
-    printf("\n");
-    RandNode(&head, 2);
-    printList(head);
-    printf("\n");
-    BubbleSort2(&head);
+    InsertionSort(&head);
     printList(head);
 
 /*
@@ -161,6 +184,7 @@ int main() {
         printf("5- Sort our Node\n");
         printf("6- Clear our Node\n");
         printf("7- Delete element with certain value (will delete first element with this value in Node)\n\n");
+        printf("8- Use already made Node for showing good situation for testing sorting\n");
 
         printf("0- Stop program\n");
         scanf("%d", &option);
