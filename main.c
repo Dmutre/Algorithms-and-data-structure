@@ -25,11 +25,21 @@ struct Node* createNodeRand(){
 };
 
 
-void RandNode(struct Node** headRef, int N){//Fill our Node with random values, using shift way of adding elements
-    for(int i = 0; i < N; i++){
-        struct Node* newNode = createNodeRand();
-        newNode->next = *headRef;
+void RandNode(struct Node** headRef, int N){//Fill our Node with random values, using push way of adding elements
+    struct Node* newNode;
+    struct Node* current = *headRef;
+    if (*headRef == NULL) {
         *headRef = newNode;
+        return;
+    }
+    while (current->next != NULL) {
+        current = current->next;
+    }
+
+    for(int i = 0; i < N; i++){
+        newNode = createNodeRand();
+        current->next = newNode;
+        current = current->next;
     }
 }
 
@@ -77,68 +87,31 @@ void deleteNode(struct Node** headRef, int value) {
 }
 
 
-void BubbleSort1(struct Node** headRef) {//From lower to bigger
-    if (*headRef == NULL) {
-        return;
+void deleteAllNode(struct Node** headRef){
+    struct Node* current = *headRef;
+    while (current != NULL) {
+        struct Node* next = current->next;
+        free(current);
+        current = next;
     }
-    int swapped = 1;
-    while (swapped) {
-        swapped = 0;
-        struct Node* current = *headRef;
-        struct Node* prev = NULL;
-        while (current->next != NULL) {
-            if (current->data > current->next->data) {
-                int temp = current->data;
-                current->data = current->next->data;
-                current->next->data = temp;
-                swapped = 1;
-            }
-            prev = current;
-            current = current->next;
-        }
-    }
-}
-
-
-void BubbleSort2(struct Node** headRef) {//From bigger to lower
-    if (*headRef == NULL) {
-        return;
-    }
-    int swapped = 1;
-    while (swapped) {
-        swapped = 0;
-        struct Node* current = *headRef;
-        struct Node* prev = NULL;
-        while (current->next != NULL) {
-            if (current->data < current->next->data) {
-                int temp = current->data;
-                current->data = current->next->data;
-                current->next->data = temp;
-                swapped = 1;
-            }
-            prev = current;
-            current = current->next;
-        }
-    }
+    *headRef = NULL;
 }
 
 
 void InsertionSort(struct Node** headRef) {
     if (*headRef == NULL) {
-        return; // List is empty
+        return;
     }
     struct Node* sortedList = *headRef;
-    *headRef = *headRef->next;
+    *headRef = (*headRef)->next;
     sortedList->next = NULL;
     while (*headRef != NULL) {
         struct Node* current = *headRef;
         *headRef = (*headRef)->next;
         if (current->data > sortedList->data) {
-            // Insert the new node at the beginning of the sorted list
             current->next = sortedList;
             sortedList = current;
         } else {
-            // Find the correct position to insert the new node
             struct Node* temp = sortedList;
             while (temp->next != NULL && current->data <= temp->next->data) {
                 temp = temp->next;
@@ -149,6 +122,7 @@ void InsertionSort(struct Node** headRef) {
     }
     *headRef = sortedList;
 }
+
 
 void printList(struct Node* headRef) {
     struct Node* current = headRef;
@@ -164,18 +138,8 @@ int main() {
     struct Node* head = NULL;
     int work = 1;
     int option, N, value;
-/*
-    Shift(&head, 1);
-    Shift(&head, 3);
-    Shift(&head, 7);
-    Shift(&head, 199);
-*/
-    RandNode(&head, 10);
-    printList(head);
-    InsertionSort(&head);
-    printList(head);
 
-/*
+
     while(work){
         printf("1- Input N and fill Node with N amount of random numbers\n");
         printf("2- Input value to insert at the end of Node\n");
@@ -183,8 +147,8 @@ int main() {
         printf("4- Print our Node\n");
         printf("5- Sort our Node\n");
         printf("6- Clear our Node\n");
-        printf("7- Delete element with certain value (will delete first element with this value in Node)\n\n");
-        printf("8- Use already made Node for showing good situation for testing sorting\n");
+        printf("7- Delete element with certain value (will delete first element with this value in Node)\n");
+        printf("8- Use already made Node for showing good situation for testing sorting\n\n");
 
         printf("0- Stop program\n");
         scanf("%d", &option);
@@ -209,11 +173,41 @@ int main() {
             case 4:
                 printList(head);
                 break;
+            case 5:
+                InsertionSort(&head);
+                printList(head);
+                break;
+            case 6:
+                deleteAllNode(&head);
+                printf("Deleting is done");
+                break;
+            case 7:
+                printf("Input value:\n");
+                scanf("%d", &value);
+                deleteNode(&head, value);
+                break;
+            case 8:
+                Shift(&head, 1);
+                Shift(&head, -3);
+                Shift(&head, 7);
+                Shift(&head, -199);
+                Push(&head, 1);
+                Push(&head, 10);
+                Push(&head, 0);
+                Push(&head, 515);
+                Push(&head, 1015);
+                Push(&head, 0);
+                Push(&head, -15);
+                Push(&head, -0);
+                printList(head);
+                break;
             case 0:
                 printf("Programme ended");
                 work = 0;
+                deleteAllNode(&head);
+                break;
         }
     }
-*/
+
     return 0;
 }
