@@ -25,21 +25,14 @@ struct Node* createNodeRand(){
 };
 
 
-void RandNode(struct Node** headRef, int N){//Fill our Node with random values, using push way of adding elements
-    struct Node* newNode;
+void RandNode(struct Node** headRef, int N) {
     struct Node* current = *headRef;
-    if (*headRef == NULL) {
+    while (N > 0) {
+        struct Node* newNode = createNodeRand();
+        newNode->next = current;
         *headRef = newNode;
-        return;
-    }
-    while (current->next != NULL) {
-        current = current->next;
-    }
-
-    for(int i = 0; i < N; i++){
-        newNode = createNodeRand();
-        current->next = newNode;
-        current = current->next;
+        current = newNode;
+        N--;
     }
 }
 
@@ -57,6 +50,7 @@ void Push(struct Node** headRef, int value) {
 
     if (*headRef == NULL) {
         *headRef = newNode;
+        printf("Lest is empty\n");
         return;
     }
     struct Node* current = *headRef;
@@ -168,7 +162,7 @@ int main() {
             case 3:
                 printf("Input value:\n");
                 scanf("%d", &value);
-                Shift(head, value);
+                Shift(&head, value);
                 break;
             case 4:
                 printList(head);
