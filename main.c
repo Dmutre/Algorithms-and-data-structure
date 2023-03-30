@@ -27,12 +27,11 @@ struct Node* createNodeRand(){
 
 void RandNode(struct Node** headRef, int N) {
     struct Node* current = *headRef;
-    while (N > 0) {
+    for (int i = 0; i < N; i++) {
         struct Node* newNode = createNodeRand();
         newNode->next = current;
         *headRef = newNode;
         current = newNode;
-        N--;
     }
 }
 
@@ -81,7 +80,7 @@ void deleteNode(struct Node** headRef, int value) {
 }
 
 
-void deleteAllNode(struct Node** headRef){
+void deleteAllNode(struct Node** headRef){//Delete all node except of head, it gets NULL value
     struct Node* current = *headRef;
     while (current != NULL) {
         struct Node* next = current->next;
@@ -180,7 +179,7 @@ int main() {
                 scanf("%d", &value);
                 deleteNode(&head, value);
                 break;
-            case 8:
+            case 8://Fill our linked list with numbers, that can show correctly working programme
                 Shift(&head, 1);
                 Shift(&head, -3);
                 Shift(&head, 7);
