@@ -4,24 +4,10 @@
 #include <math.h>
 
 
-//HBRUSH WHITE_BRUSH = (HBRUSH)GetStockObject(WHITE_BRUSH);
-
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 char ProgName[] = "Лабораторна робота 3";
 
-void arrow(float fi, int px, int py){
-    fi = 3.1416 * (180.0 - fi) / 180.0;
-    int lx, ly, rx, ry;
-    lx = px + 15 * cos(fi + 0.3);
-    rx = px + 15 * cos(fi - 0.3);
-    ly = py + 15 * sin(fi + 0.3);
-    ry = py + 15 * sin(fi - 0.3);
-    MoveToEx(hdc, px, py, NULL);
-    LineTo(hdc, px, py);
-    LineTo(hdc, rx, ry);
-    return 0;
-}
 
 void drawGraph(HWND hWnd, HDC hdc)
 {
@@ -75,6 +61,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
     return(lpMsg.wParam);
 }
 
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam){
     HDC hdc;
     PAINTSTRUCT ps;
@@ -92,6 +79,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam){
     }
     return 0;
 
+}
+
+
+void arrow(float fi, int px, int py){
+    fi = 3.1416 * (180.0 - fi) / 180.0;
+    int lx, ly, rx, ry;
+    lx = px + 15 * cos(fi + 0.3);
+    rx = px + 15 * cos(fi - 0.3);
+    ly = py + 15 * sin(fi + 0.3);
+    ry = py + 15 * sin(fi - 0.3);
+    MoveToEx(hdc, px, py, NULL);
+    LineTo(hdc, px, py);
+    LineTo(hdc, rx, ry);
+    return 0;
 }
 
 
