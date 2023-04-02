@@ -8,6 +8,19 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 char ProgName[] = "Лабораторна робота 3";
 
+void arrow(float fi, int px, int py, HDC hdc){
+    fi = 3.1416 * (180.0 - fi) / 180.0;
+    int lx, ly, rx, ry;
+    lx = px + 15 * cos(fi + 0.3);
+    rx = px + 15 * cos(fi - 0.3);
+    ly = py + 15 * sin(fi + 0.3);
+    ry = py + 15 * sin(fi - 0.3);
+    MoveToEx(hdc, px, py, NULL);
+    LineTo(hdc, px, py);
+    LineTo(hdc, rx, ry);
+    return 0;
+}
+
 
 void drawGraph(HWND hWnd, HDC hdc)
 {
@@ -21,9 +34,9 @@ void drawGraph(HWND hWnd, HDC hdc)
     SelectObject(hdc, KPen);
     MoveToEx(hdc, nx[0], ny[0], NULL);
     LineTo(hdc, nx[1], ny[1]);
-    arrow(0,nx[1]-dx,ny[1]);
+    arrow(0,nx[1]-dx,ny[1], hdc);
     Arc(hdc, nx[0], ny[0]-40, nx[2], ny[2]+40, nx[2], ny[2], nx[0], ny[0]);
-    arrow(-45.0,nx[2]-dx*0.5,ny[2]-dy*0.8);
+    arrow(-45.0,nx[2]-dx*0.5,ny[2]-dy*0.8, hdc);
     SelectObject(hdc, BPen);
     for(i=0;i<=2;i++){
         Ellipse(hdc, nx[i]-dx,ny[i]-dy,nx[i]+dx,ny[i]+dy);
@@ -79,24 +92,4 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam){
     }
     return 0;
 
-}
-
-
-void arrow(float fi, int px, int py){
-    fi = 3.1416 * (180.0 - fi) / 180.0;
-    int lx, ly, rx, ry;
-    lx = px + 15 * cos(fi + 0.3);
-    rx = px + 15 * cos(fi - 0.3);
-    ly = py + 15 * sin(fi + 0.3);
-    ry = py + 15 * sin(fi - 0.3);
-    MoveToEx(hdc, px, py, NULL);
-    LineTo(hdc, px, py);
-    LineTo(hdc, rx, ry);
-    return 0;
-}
-
-
-int main() {
-
-    return 0;
 }
