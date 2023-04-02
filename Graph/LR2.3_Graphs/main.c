@@ -18,6 +18,9 @@ void arrow(float fi, int px, int py, HDC hdc){
     MoveToEx(hdc, px, py, NULL);
     LineTo(hdc, px, py);
     LineTo(hdc, rx, ry);
+    MoveToEx(hdc, px, py, NULL);
+    LineTo(hdc, lx, ly);
+
     return 0;
 }
 
