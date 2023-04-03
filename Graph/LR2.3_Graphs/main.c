@@ -15,23 +15,78 @@ void arrow(float fi, int px, int py, HDC hdc){
     rx = px + 15 * cos(fi - 0.3);
     ly = py + 15 * sin(fi + 0.3);
     ry = py + 15 * sin(fi - 0.3);
-    MoveToEx(hdc, px, py, NULL);
+    MoveToEx(hdc, px, py, NULL);//Для роботи цієї функції я підключив файл gdi32
     LineTo(hdc, px, py);
     LineTo(hdc, rx, ry);
     MoveToEx(hdc, px, py, NULL);
     LineTo(hdc, lx, ly);
-
     return 0;
+}
+
+float** randm(int n) {
+    srand(2113);
+    float** arr = (float**)malloc(n * sizeof(float*));
+    for(int i = 0; i < n; i++){
+        arr[i] = (float*)malloc(n * sizeof(float));
+        for(int j = 0; j < n; j++){
+            arr[i][j] = ((float)rand() / (float)RAND_MAX) * 2.0;
+        }
+    }
+    return arr;
+}
+
+
+float** mulmr(float c, float** mat, int n) {
+    float** res = (float**)malloc(n * sizeof(float*));
+    for(int i = 0; i < n; i++){
+        res[i] = (float*)malloc(n * sizeof(float));
+        for(int j = 0; j < n; j++){
+            res[i][j] = roundf(mat[i][j] * c);
+        }
+    }
+    return res;
 }
 
 
 void drawGraph(HWND hWnd, HDC hdc)
 {
-    char *nn[3] = {"1", "2", "3"};
-    int nx[3] = {100,200,300};
-    int ny[3] = {100,100,100};
+    char *nn[11] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"};
+    int nx[11] = {100, 200, 300, 400, 400, 400, 400, 300, 200, 100, 100};
+    int ny[11] = {100, 100, 100, 100, 200, 300, 400, 400, 400, 400, 250};
     int dx = 16, dy = 16, dtx = 5;
-    int i;
+    int i, n = 11;
+    float** T = randm(n);
+    float** A = mulmr(0.715, T, n);
+    printf("T:\n");
+    for(int i = 0; i < n; i++){
+        for(int j = 0; j < n; j++){
+            printf("%.2f ", T[i][j]);
+        }
+        printf("\n");
+    }
+
+    printf("A:\n");
+    for(int i = 0; i < n; i++){
+        for(int j = 0; j < n; j++){
+            printf("%.2f ", A[i][j]);
+        }
+        printf("\n");
+    }/*
+    for(int i = 0; i < n; i++){
+        for(int j = 0; j < n; j++){
+            if(A[i][j] == 1.0){
+                MoveToEx(hdc, nx[i], ny[i], NULL);
+                LineTo(hdc, nx[j], ny[j]);
+            }
+        }
+    }*/
+    MoveToEx(hdc, nx[0], ny[0], NULL);
+    LineTo(hdc, nx[2], ny[2]);
+    arrow(0,nx[2]-dx,ny[2], hdc);
+    Arc(hdc, nx[0], ny[0]-40, nx[1], ny[1]+40, nx[1], ny[1], nx[0], ny[0]);
+    arrow(-85.0,nx[1]-dx*0.5,ny[1]-dy*0.8, hdc);
+
+
     HPEN BPen = CreatePen(PS_SOLID, 2, RGB(50, 0, 255));
     HPEN KPen = CreatePen(PS_SOLID, 1, RGB(20, 20, 5));
     SelectObject(hdc, KPen);
@@ -41,10 +96,16 @@ void drawGraph(HWND hWnd, HDC hdc)
     Arc(hdc, nx[0], ny[0]-40, nx[2], ny[2]+40, nx[2], ny[2], nx[0], ny[0]);
     arrow(-45.0,nx[2]-dx*0.5,ny[2]-dy*0.8, hdc);
     SelectObject(hdc, BPen);
-    for(i=0;i<=2;i++){
+    for(i = 0;i < 11; i++){
         Ellipse(hdc, nx[i]-dx,ny[i]-dy,nx[i]+dx,ny[i]+dy);
-        TextOut(hdc, nx[i]-dtx,ny[i]-dy/2, nn[i],1);
+        TextOut(hdc, nx[i]-dtx,ny[i]-dy/2, nn[i],2);
     }
+    for(int i = 0; i < n; i++){
+        free(T[i]);
+        free(A[i]);
+    }
+    free(T);
+    free(A);
 }
 
 
@@ -67,7 +128,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
     HWND hWnd;
     MSG lpMsg;
 
-    hWnd = CreateWindow(ProgName, "Лабораторна робота 3. Виконав Д. М. Лесько", WS_OVERLAPPEDWINDOW, 100, 100, 460, 240, (HWND)NULL, (HMENU)NULL, (HINSTANCE)hInstance, (HINSTANCE)NULL);
+    hWnd = CreateWindow(ProgName, "Лабораторна робота 3. Виконав Д. М. Лесько", WS_OVERLAPPEDWINDOW, 100, 100, 600, 500, (HWND)NULL, (HMENU)NULL, (HINSTANCE)hInstance, (HINSTANCE)NULL);
     ShowWindow(hWnd, nCmdShow);
     while(GetMessage(&lpMsg, hWnd, 0, 0)){
         TranslateMessage(&lpMsg);
