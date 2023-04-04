@@ -15,7 +15,7 @@ void arrow(float fi, int px, int py, HDC hdc){
     rx = px + 15 * cos(fi - 0.3);
     ly = py + 15 * sin(fi + 0.3);
     ry = py + 15 * sin(fi - 0.3);
-    MoveToEx(hdc, px, py, NULL);//Для роботи цієї функції я підключив файл gdi32
+    MoveToEx(hdc, px, py, NULL);
     LineTo(hdc, px, py);
     LineTo(hdc, rx, ry);
     MoveToEx(hdc, px, py, NULL);
@@ -71,30 +71,41 @@ void drawGraph(HWND hWnd, HDC hdc)
             printf("%.2f ", A[i][j]);
         }
         printf("\n");
-    }/*
+    }
     for(int i = 0; i < n; i++){
         for(int j = 0; j < n; j++){
             if(A[i][j] == 1.0){
+                if(2 <= abs(i - j) && abs(i - j) <= 3){
+                    if(nx[i] == nx[j] || ny[i] == ny[j]){
+                        Arc(hdc, nx[i], ny[i]-40, nx[j], ny[j]+40, nx[j], ny[j], nx[i], ny[i]);
+                    }
+                }
+            }else if(i == j){
+                Arc(hdc, nx[i], ny[i], 100, 90, 90, 100, 100, 100);
+            } else{
                 MoveToEx(hdc, nx[i], ny[i], NULL);
                 LineTo(hdc, nx[j], ny[j]);
             }
         }
-    }*/
+    }
+    /*
     MoveToEx(hdc, nx[0], ny[0], NULL);
     LineTo(hdc, nx[2], ny[2]);
     arrow(0,nx[2]-dx,ny[2], hdc);
     Arc(hdc, nx[0], ny[0]-40, nx[1], ny[1]+40, nx[1], ny[1], nx[0], ny[0]);
     arrow(-85.0,nx[1]-dx*0.5,ny[1]-dy*0.8, hdc);
-
+    */
 
     HPEN BPen = CreatePen(PS_SOLID, 2, RGB(50, 0, 255));
     HPEN KPen = CreatePen(PS_SOLID, 1, RGB(20, 20, 5));
+    /*
     SelectObject(hdc, KPen);
     MoveToEx(hdc, nx[0], ny[0], NULL);
     LineTo(hdc, nx[1], ny[1]);
     arrow(0,nx[1]-dx,ny[1], hdc);
     Arc(hdc, nx[0], ny[0]-40, nx[2], ny[2]+40, nx[2], ny[2], nx[0], ny[0]);
     arrow(-45.0,nx[2]-dx*0.5,ny[2]-dy*0.8, hdc);
+    */
     SelectObject(hdc, BPen);
     for(i = 0;i < 11; i++){
         Ellipse(hdc, nx[i]-dx,ny[i]-dy,nx[i]+dx,ny[i]+dy);
