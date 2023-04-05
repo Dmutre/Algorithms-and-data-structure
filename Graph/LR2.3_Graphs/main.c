@@ -79,10 +79,11 @@ void drawGraph(HWND hWnd, HDC hdc)
                     if(nx[i] == nx[j] || ny[i] == ny[j]){
                         Arc(hdc, nx[i], ny[i]-40, nx[j], ny[j]+40, nx[j], ny[j], nx[i], ny[i]);
                     }
+                }else if(i == j){
+                Ellipse(hdc, nx[i]-15-20, ny[i]+15-20, nx[i]+5, ny[i]+35);
+                //Arc(hdc, nx[i]-30, ny[i]-10,nx[i]+10, ny[i]+30,nx[i]-30, nx[i]-10, nx[i]-30,ny[i]+10);
                 }
-            }else if(i == j){
-                Arc(hdc, nx[i], ny[i], 100, 90, 90, 100, 100, 100);
-            } else{
+            }else{
                 MoveToEx(hdc, nx[i], ny[i], NULL);
                 LineTo(hdc, nx[j], ny[j]);
             }
