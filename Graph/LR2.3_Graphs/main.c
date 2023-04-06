@@ -35,7 +35,6 @@ float** randm(int n) {
     return arr;
 }
 
-
 float** mulmr(float c, float** mat, int n) {
     float** res = (float**)malloc(n * sizeof(float*));
     for(int i = 0; i < n; i++){
@@ -47,45 +46,83 @@ float** mulmr(float c, float** mat, int n) {
     return res;
 }
 
+void symbolArray(int n, char* arr){
+    for(int i = 0; i < n; i++){
+        arr[i] = (i+1) + '0';
+    }
+}
+
+void arrayX(int N, int* array){
+    float edge = N / 4.0;
+    printf("%d\n", edgeCeil);
+    for(int i = 0; i < edgeCeil+1; i++){
+        array[i] = 100 + 100*i;
+    }
+
+    for(int i = edgeCeil; i < edgeCeil*2; i++){
+        array[i] = array[i-1];
+    }
+
+    for(int i = edgeCeil*2; i < edgeCeil*3; i++){
+        array[i] = array[i-1]-100;
+    }
+
+    for(int i = edgeCeil*3; i < edgeCeil*4-2; i++){
+        if(i == N-1) break;
+        array[i] = array[i-1];
+    }
+}
+
 
 void drawGraph(HWND hWnd, HDC hdc)
 {
+    const int N = 11;//Number of our vertex
     char *nn[11] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"};
-    int nx[11] = {100, 200, 300, 400, 400, 400, 400, 300, 200, 100, 100};
+    //int nx[11] = {100, 200, 300, 400, 400, 400, 400, 300, 200, 100, 100};
+    int nx[N];
+    arrayX(N, nx);
+    for(int i = 0; i < N; i++){
+        printf("%d ", nx[i]);
+    }
+    printf("\n");
     int ny[11] = {100, 100, 100, 100, 200, 300, 400, 400, 400, 400, 250};
     int dx = 16, dy = 16, dtx = 5;
-    int i, n = 11;
-    float** T = randm(n);
-    float** A = mulmr(0.715, T, n);
+    printf("Size of array: %d\n", sizeof(nn)/sizeof(nn[0]));
+
+    float** T = randm(N);
+    float** A = mulmr(0.715, T, N);
     printf("T:\n");
-    for(int i = 0; i < n; i++){
-        for(int j = 0; j < n; j++){
+    for(int i = 0; i < N; i++){
+        for(int j = 0; j < N; j++){
             printf("%.2f ", T[i][j]);
         }
         printf("\n");
     }
 
     printf("A:\n");
-    for(int i = 0; i < n; i++){
-        for(int j = 0; j < n; j++){
-            printf("%.2f ", A[i][j]);
+    for(int i = 0; i < N; i++){
+        for(int j = 0; j < N; j++){
+            printf("%.0f ", A[i][j]);
         }
         printf("\n");
     }
-    for(int i = 0; i < n; i++){
-        for(int j = 0; j < n; j++){
+
+    for(int i = 0; i < N; i++){
+        for(int j = 0; j < N; j++){
             if(A[i][j] == 1.0){
                 if(2 <= abs(i - j) && abs(i - j) <= 3){
                     if(nx[i] == nx[j] || ny[i] == ny[j]){
                         Arc(hdc, nx[i], ny[i]-40, nx[j], ny[j]+40, nx[j], ny[j], nx[i], ny[i]);
+                        MoveToEx(hdc, nx[i], ny[i], NULL);
+                        arrow(-45.0,nx[j]-dx*0.5,ny[j]-dy*0.8, hdc);
                     }
                 }else if(i == j){
                 Ellipse(hdc, nx[i]-15-20, ny[i]+15-20, nx[i]+5, ny[i]+35);
-                //Arc(hdc, nx[i]-30, ny[i]-10,nx[i]+10, ny[i]+30,nx[i]-30, nx[i]-10, nx[i]-30,ny[i]+10);
                 }
             }else{
                 MoveToEx(hdc, nx[i], ny[i], NULL);
                 LineTo(hdc, nx[j], ny[j]);
+                arrow(acos(nx[j]/ny[j]),nx[j]-dx,ny[j], hdc);
             }
         }
     }
@@ -108,18 +145,17 @@ void drawGraph(HWND hWnd, HDC hdc)
     arrow(-45.0,nx[2]-dx*0.5,ny[2]-dy*0.8, hdc);
     */
     SelectObject(hdc, BPen);
-    for(i = 0;i < 11; i++){
+    for(int i = 0;i < N; i++){
         Ellipse(hdc, nx[i]-dx,ny[i]-dy,nx[i]+dx,ny[i]+dy);
         TextOut(hdc, nx[i]-dtx,ny[i]-dy/2, nn[i],2);
     }
-    for(int i = 0; i < n; i++){
+    for(int i = 0; i < N; i++){
         free(T[i]);
         free(A[i]);
     }
     free(T);
     free(A);
 }
-
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow){
     WNDCLASS w;
@@ -150,7 +186,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
     return(lpMsg.wParam);
 }
 
-
 LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam){
     HDC hdc;
     PAINTSTRUCT ps;
@@ -167,5 +202,4 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam){
             return DefWindowProc(hWnd, messg, wParam, lParam);
     }
     return 0;
-
 }
