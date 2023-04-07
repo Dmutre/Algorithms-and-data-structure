@@ -46,51 +46,76 @@ float** mulmr(float c, float** mat, int n) {
     return res;
 }
 
-void symbolArray(int n, char* arr){
-    for(int i = 0; i < n; i++){
-        arr[i] = (i+1) + '0';
+char** symbolArray(int N){
+    char** array = malloc(N * sizeof(char*));
+    for(int i = 0; i < N; i++) {
+        array[i] = malloc(3 * sizeof(char)); // allocate memory for each element
+        sprintf(array[i], "%d", i+1); // use sprintf to convert int to string
     }
+    return array;
 }
 
 void arrayX(int N, int* array){
     float edge = N / 4.0;
-    printf("%d\n", edgeCeil);
+    int edgeCeil = ceil(edge);
+
     for(int i = 0; i < edgeCeil+1; i++){
         array[i] = 100 + 100*i;
     }
 
-    for(int i = edgeCeil; i < edgeCeil*2; i++){
+    for(int i = edgeCeil+1; i < edgeCeil*2+1; i++){
         array[i] = array[i-1];
     }
 
-    for(int i = edgeCeil*2; i < edgeCeil*3; i++){
+    for(int i = edgeCeil*2+1; i < edgeCeil*3+1; i++){
         array[i] = array[i-1]-100;
     }
 
-    for(int i = edgeCeil*3; i < edgeCeil*4-2; i++){
-        if(i == N-1) break;
-        array[i] = array[i-1];
+    for(int i = edgeCeil*3+1; i < edgeCeil*4-1 && i < N; i++){
+        array[i] = array[0];
     }
 }
 
+void arrayY(int N, int* array){
+    float edge = N / 4.0;
+    int edgeCeil = ceil(edge);
+
+    for(int i = 0; i < edgeCeil+1; i++){
+        array[i] = 100;
+    }
+
+    for(int i = edgeCeil+1; i < edgeCeil*2+1; i++){
+        array[i] = array[i-1]+100;
+    }
+
+    for(int i = edgeCeil*2+1; i < edgeCeil*3+1; i++){
+        array[i] = array[i-1];
+    }
+
+    for(int i = edgeCeil*3+1; i < edgeCeil*4-1 && i < N; i++){
+        array[i] = array[i-1]-100;
+    }
+}
 
 void drawGraph(HWND hWnd, HDC hdc)
 {
     const int N = 11;//Number of our vertex
-    char *nn[11] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"};
+    //char *nn[11] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"};
     //int nx[11] = {100, 200, 300, 400, 400, 400, 400, 300, 200, 100, 100};
-    int nx[N];
+    //int ny[11] = {100, 100, 100, 100, 200, 300, 400, 400, 400, 400, 300};
+    int nx[N], ny[N];
+    char** nn = symbolArray(N);
     arrayX(N, nx);
+    arrayY(N, ny);
     for(int i = 0; i < N; i++){
-        printf("%d ", nx[i]);
+        printf("%s ", nn[i]);
     }
     printf("\n");
-    int ny[11] = {100, 100, 100, 100, 200, 300, 400, 400, 400, 400, 250};
     int dx = 16, dy = 16, dtx = 5;
-    printf("Size of array: %d\n", sizeof(nn)/sizeof(nn[0]));
 
     float** T = randm(N);
     float** A = mulmr(0.715, T, N);
+
     printf("T:\n");
     for(int i = 0; i < N; i++){
         for(int j = 0; j < N; j++){
