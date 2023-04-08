@@ -100,6 +100,8 @@ void arrayY(int N, int* array){
 void drawGraph(HWND hWnd, HDC hdc)
 {
     const int N = 11;//Number of our vertex
+    float edge = N / 4.0;
+    int edgeCeil = ceil(edge);//Number of vertex, that we can draw four time to get squer
     //char *nn[11] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"};
     //int nx[11] = {100, 200, 300, 400, 400, 400, 400, 300, 200, 100, 100};
     //int ny[11] = {100, 100, 100, 100, 200, 300, 400, 400, 400, 400, 300};
@@ -134,41 +136,34 @@ void drawGraph(HWND hWnd, HDC hdc)
 
     for(int i = 0; i < N; i++){
         for(int j = 0; j < N; j++){
-            if(A[i][j] == 1.0){
-                if(2 <= abs(i - j) && abs(i - j) <= 3){
-                    if(nx[i] == nx[j] || ny[i] == ny[j]){
-                        Arc(hdc, nx[i], ny[i]-40, nx[j], ny[j]+40, nx[j], ny[j], nx[i], ny[i]);
-                        MoveToEx(hdc, nx[i], ny[i], NULL);
-                        arrow(-45.0,nx[j]-dx*0.5,ny[j]-dy*0.8, hdc);
+            if(A[i][j] == 1){
+                if(i == j){//for Elipses
+                    int dir = (int) ceil((i+1)/(float) edgeCeil);
+                    if(dir%2 == 0){
+                        if(dir > edgeCeil) Ellipse(hdc, nx[i]-40, ny[i]-20, nx[i], ny[i]+20);
+                        else Ellipse(hdc, nx[i]+40, ny[i]-20, nx[i], ny[i]+20);
+                    } else{
+                        if(dir >= edgeCeil) Ellipse(hdc, nx[i]-20, ny[i]+40, nx[i]+20, ny[i]);
+                        else Ellipse(hdc, nx[i]-20, ny[i]-40, nx[i]+20, ny[i]);
                     }
-                }else if(i == j){
-                Ellipse(hdc, nx[i]-15-20, ny[i]+15-20, nx[i]+5, ny[i]+35);
                 }
-            }else{
-                MoveToEx(hdc, nx[i], ny[i], NULL);
-                LineTo(hdc, nx[j], ny[j]);
-                arrow(acos(nx[j]/ny[j]),nx[j]-dx,ny[j], hdc);
-            }
+            } else if(1){}
         }
     }
     /*
-    MoveToEx(hdc, nx[0], ny[0], NULL);
-    LineTo(hdc, nx[2], ny[2]);
-    arrow(0,nx[2]-dx,ny[2], hdc);
-    Arc(hdc, nx[0], ny[0]-40, nx[1], ny[1]+40, nx[1], ny[1], nx[0], ny[0]);
-    arrow(-85.0,nx[1]-dx*0.5,ny[1]-dy*0.8, hdc);
-    */
+    Arc(hdc, nx[i], ny[i]-40, nx[j], ny[j]+40, nx[j], ny[j], nx[i], ny[i]);
+    MoveToEx(hdc, nx[i], ny[i], NULL);
+    arrow(45,nx[j]-dx*0.5,ny[j]-dy*0.8, hdc);
 
+    Ellipse(hdc, nx[i]-15-20, ny[i]+15-20, nx[i]+5, ny[i]+35);
+
+    MoveToEx(hdc, nx[i], ny[i], NULL);
+    LineTo(hdc, nx[j], ny[j]);
+    arrow(0,nx[j]-dx,ny[j], hdc);
+    */
     HPEN BPen = CreatePen(PS_SOLID, 2, RGB(50, 0, 255));
     HPEN KPen = CreatePen(PS_SOLID, 1, RGB(20, 20, 5));
-    /*
-    SelectObject(hdc, KPen);
-    MoveToEx(hdc, nx[0], ny[0], NULL);
-    LineTo(hdc, nx[1], ny[1]);
-    arrow(0,nx[1]-dx,ny[1], hdc);
-    Arc(hdc, nx[0], ny[0]-40, nx[2], ny[2]+40, nx[2], ny[2], nx[0], ny[0]);
-    arrow(-45.0,nx[2]-dx*0.5,ny[2]-dy*0.8, hdc);
-    */
+
     SelectObject(hdc, BPen);
     for(int i = 0;i < N; i++){
         Ellipse(hdc, nx[i]-dx,ny[i]-dy,nx[i]+dx,ny[i]+dy);
