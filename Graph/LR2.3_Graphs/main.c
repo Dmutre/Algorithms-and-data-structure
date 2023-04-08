@@ -112,6 +112,14 @@ void drawGraph(HWND hWnd, HDC hdc)
     for(int i = 0; i < N; i++){
         printf("%s ", nn[i]);
     }
+    printf("%\n");
+    for(int i = 0; i < N; i++){
+        printf("%d ", nx[i]);
+    }
+    printf("%\n");
+    for(int i = 0; i < N; i++){
+        printf("%d ", ny[i]);
+    }
     printf("\n");
     int dx = 16, dy = 16, dtx = 5;
 
@@ -146,8 +154,10 @@ void drawGraph(HWND hWnd, HDC hdc)
                         if(dir >= edgeCeil) Ellipse(hdc, nx[i]-20, ny[i]+40, nx[i]+20, ny[i]);
                         else Ellipse(hdc, nx[i]-20, ny[i]-40, nx[i]+20, ny[i]);
                     }
+                } else if(abs(i - j) >= 2 && abs(i-j) <= edgeCeil && (nx[i] == nx[j] || ny[i] == ny[j])){//for Arc
+                    Arc(hdc, nx[i], ny[i]-40, nx[j], ny[j]+40, nx[j], ny[j], nx[i], ny[i]);
                 }
-            } else if(1){}
+            }
         }
     }
     /*
