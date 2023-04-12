@@ -102,7 +102,6 @@ void drawGraph(HWND hWnd, HDC hdc)
     const int N = 11;//Number of our vertex
     float edge = N / 4.0;
     int edgeCeil = ceil(edge);//Number of vertex, that we can draw four time to get squer
-    //char *nn[11] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"};
     //int nx[11] = {100, 200, 300, 400, 400, 400, 400, 300, 200, 100, 100};
     //int ny[11] = {100, 100, 100, 100, 200, 300, 400, 400, 400, 400, 300};
     int nx[N], ny[N];
@@ -142,10 +141,10 @@ void drawGraph(HWND hWnd, HDC hdc)
         printf("\n");
     }
 
-    for(int i = 0; i < N; i++){
+    for(int i = 0; i < N; i++){//For elipses
         for(int j = 0; j < N; j++){
             if(A[i][j] == 1){
-                if(i == j){//for Elipses
+                if(i == j){
                     int dir = (int) ceil((i+1)/(float) edgeCeil);
                     if(dir%2 == 0){
                         if(dir > edgeCeil) Ellipse(hdc, nx[i]-40, ny[i]-20, nx[i], ny[i]+20);
@@ -154,12 +153,52 @@ void drawGraph(HWND hWnd, HDC hdc)
                         if(dir >= edgeCeil) Ellipse(hdc, nx[i]-20, ny[i]+40, nx[i]+20, ny[i]);
                         else Ellipse(hdc, nx[i]-20, ny[i]-40, nx[i]+20, ny[i]);
                     }
-                } else if(abs(i - j) >= 2 && abs(i-j) <= edgeCeil && (nx[i] == nx[j] || ny[i] == ny[j])){//for Arc
-                    Arc(hdc, nx[i], ny[i]-40, nx[j], ny[j]+40, nx[j], ny[j], nx[i], ny[i]);
                 }
             }
         }
     }
+
+
+    int count = 0, count2 = 0;
+    for(int i = 0; i < N; i++){//For lines when circles are on the same row in X or Y
+        for(int j = 0; j < N; j++){
+            if(A[i][j] == 1 && abs(i-j) >=2 && abs(i-j) <= edgeCeil && (nx[i] == nx[j] || ny[i] == ny[j])){
+                if(nx[i] == nx[j]){
+                    if(i > j){
+                        MoveToEx(hdc, nx[i], ny[i], NULL);
+                        LineTo(hdc, nx[j]+50, ny[i]-(ny[i]-ny[j])/2);
+                        MoveToEx(hdc, nx[j]+50, ny[i]-(ny[i]-ny[j])/2, NULL);
+                        LineTo(hdc, nx[j], ny[j]);
+                        count++;
+                    } else{
+                        MoveToEx(hdc, nx[i], ny[i], NULL);
+                        LineTo(hdc, nx[j]-50, ny[i]-(ny[i]-ny[j])/2);
+                        MoveToEx(hdc, nx[j]-50, ny[i]-(ny[i]-ny[j])/2, NULL);
+                        LineTo(hdc, nx[j], ny[j]);
+                        count++;
+                    }
+                } else{
+                    if(i > j){
+                        MoveToEx(hdc, nx[i], ny[i], NULL);
+                        LineTo(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]+50);
+                        MoveToEx(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]+50, NULL);
+                        LineTo(hdc, nx[j], ny[j]);
+                        count++;
+                    } else{
+                        MoveToEx(hdc, nx[i], ny[i], NULL);
+                        LineTo(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-50);
+                        MoveToEx(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-50, NULL);
+                        LineTo(hdc, nx[j], ny[j]);
+                        count++;
+                    }
+                }
+            }
+        }
+    }
+
+    printf("%d %d\n", count, count2);
+
+
     /*
     Arc(hdc, nx[i], ny[i]-40, nx[j], ny[j]+40, nx[j], ny[j], nx[i], ny[i]);
     MoveToEx(hdc, nx[i], ny[i], NULL);
