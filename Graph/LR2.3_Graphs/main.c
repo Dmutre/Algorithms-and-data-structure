@@ -140,7 +140,7 @@ void drawGraph(HWND hWnd, HDC hdc)
         }
         printf("\n");
     }
-
+/*
     for(int i = 0; i < N; i++){//For elipses
         for(int j = 0; j < N; j++){
             if(A[i][j] == 1){
@@ -159,7 +159,6 @@ void drawGraph(HWND hWnd, HDC hdc)
     }
 
 
-    int count = 0, count2 = 0;
     for(int i = 0; i < N; i++){//For lines when circles are on the same row in X or Y
         for(int j = 0; j < N; j++){
             if(A[i][j] == 1 && abs(i-j) >=2 && abs(i-j) <= edgeCeil && (nx[i] == nx[j] || ny[i] == ny[j])){
@@ -169,13 +168,11 @@ void drawGraph(HWND hWnd, HDC hdc)
                         LineTo(hdc, nx[j]+50, ny[i]-(ny[i]-ny[j])/2);
                         MoveToEx(hdc, nx[j]+50, ny[i]-(ny[i]-ny[j])/2, NULL);
                         LineTo(hdc, nx[j], ny[j]);
-                        count++;
                     } else{
                         MoveToEx(hdc, nx[i], ny[i], NULL);
                         LineTo(hdc, nx[j]-50, ny[i]-(ny[i]-ny[j])/2);
                         MoveToEx(hdc, nx[j]-50, ny[i]-(ny[i]-ny[j])/2, NULL);
                         LineTo(hdc, nx[j], ny[j]);
-                        count++;
                     }
                 } else{
                     if(i > j){
@@ -183,21 +180,34 @@ void drawGraph(HWND hWnd, HDC hdc)
                         LineTo(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]+50);
                         MoveToEx(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]+50, NULL);
                         LineTo(hdc, nx[j], ny[j]);
-                        count++;
                     } else{
                         MoveToEx(hdc, nx[i], ny[i], NULL);
                         LineTo(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-50);
                         MoveToEx(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-50, NULL);
                         LineTo(hdc, nx[j], ny[j]);
-                        count++;
                     }
                 }
             }
         }
     }
 
-    printf("%d %d\n", count, count2);
+*/
 
+
+
+
+    int count = 0, atall = 0;
+    for(int i = 0; i < N; i++){//For lines between vertex (must be 56 lines)
+        for(int j = 0; j < N; j++){
+            if(A[i][j] == 1 && i != j && (nx[i] != nx[j] || ny[i] != ny[j])){
+                MoveToEx(hdc, nx[i], ny[i], NULL);
+                LineTo(hdc, nx[j], ny[j]);
+                count++;
+            }
+        }
+    }
+
+    printf("%d\n", count);//must output 56
 
     /*
     Arc(hdc, nx[i], ny[i]-40, nx[j], ny[j]+40, nx[j], ny[j], nx[i], ny[i]);
