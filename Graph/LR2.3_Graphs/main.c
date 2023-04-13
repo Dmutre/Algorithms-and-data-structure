@@ -151,7 +151,7 @@ void drawGraph(HWND hWnd, HDC hdc)
         }
         printf("\n");
     }
-/*
+
     for(int i = 0; i < N; i++){//For elipses
         for(int j = 0; j < N; j++){
             if(A[i][j] == 1){
@@ -179,11 +179,7 @@ void drawGraph(HWND hWnd, HDC hdc)
                         LineTo(hdc, nx[j]+50, ny[i]-(ny[i]-ny[j])/2);
                         MoveToEx(hdc, nx[j]+50, ny[i]-(ny[i]-ny[j])/2, NULL);
                         LineTo(hdc, nx[j], ny[j]);
-                        int dx = nx[j] - nx[j]+50;
-                        int dy = ny[j] - (ny[i]-(ny[i]-ny[j])/2);
-                        float angle = atan2(dy, dx);
-                        printf("%f\n", angle);
-                        arrow(angle*100, nx[j], ny[j], hdc);
+                        arrow2(nx[j]+50, ny[i]-(ny[i]-ny[j])/2, nx[j]+dtx, ny[j]+10, hdc);
                     } else{
                         MoveToEx(hdc, nx[i], ny[i], NULL);
                         LineTo(hdc, nx[j]-50, ny[i]-(ny[i]-ny[j])/2);
@@ -206,15 +202,15 @@ void drawGraph(HWND hWnd, HDC hdc)
             }
         }
     }
-*/
 
 
 
 
 
+/*
     int count1 = 0, count2 = 0, atall = 0;
-    for(int i = 0; i < 8; i++){//For lines between vertex (must be 56 lines)
-        for(int j = 0; j < 8; j++){
+    for(int i = 0; i < N; i++){//For lines between vertex (must be 56 lines)
+        for(int j = 0; j < N; j++){
             if(A[i][j] == 1){
                 if(abs(i-j) >=2 && abs(i-j) <= edgeCeil && (nx[i] == nx[j] || ny[i] == ny[j])){
                     count1++;
@@ -224,9 +220,10 @@ void drawGraph(HWND hWnd, HDC hdc)
                     atall++;
                     if(i > j && A[j][i] == 1){
                         MoveToEx(hdc, nx[i], ny[i], NULL);
-                        LineTo(hdc, (nx[i]+nx[j])/2+20, (ny[i]+ny[j])/2+20);
-                        MoveToEx(hdc, (nx[i]+nx[j])/2+20, (ny[i]+ny[j])/2+20, NULL);
+                        LineTo(hdc, (nx[i]+nx[j])/2+20, (ny[i]+ny[j])/2);
+                        MoveToEx(hdc, (nx[i]+nx[j])/2+20, (ny[i]+ny[j])/2, NULL);
                         LineTo(hdc, nx[j], ny[j]);
+
                     } else{
                         MoveToEx(hdc, nx[i], ny[i], NULL);
                         LineTo(hdc, nx[j], ny[j]);
@@ -235,20 +232,7 @@ void drawGraph(HWND hWnd, HDC hdc)
             }
         }
     }
-
-    //printf("%d %d %d\n", count1, count2, atall);//must output 56
-
-    /*
-    Arc(hdc, nx[i], ny[i]-40, nx[j], ny[j]+40, nx[j], ny[j], nx[i], ny[i]);
-    MoveToEx(hdc, nx[i], ny[i], NULL);
-    arrow(45,nx[j]-dx*0.5,ny[j]-dy*0.8, hdc);
-
-    Ellipse(hdc, nx[i]-15-20, ny[i]+15-20, nx[i]+5, ny[i]+35);
-
-    MoveToEx(hdc, nx[i], ny[i], NULL);
-    LineTo(hdc, nx[j], ny[j]);
-    arrow(0,nx[j]-dx,ny[j], hdc);
-    */
+*/
     HPEN BPen = CreatePen(PS_SOLID, 2, RGB(50, 0, 255));
     HPEN KPen = CreatePen(PS_SOLID, 1, RGB(20, 20, 5));
 
