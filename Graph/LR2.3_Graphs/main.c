@@ -23,6 +23,17 @@ void arrow(float fi, int px, int py, HDC hdc){
     return 0;
 }
 
+void arrow2(int fromx, int fromy, int tox, int toy, HDC hdc) {
+    int dx = tox - fromx;
+    int dy = toy - fromy;
+    float headlen = 20.0;
+    float angle = atan2(dy, dx);
+    MoveToEx(hdc, tox, toy, NULL);
+    MoveToEx(hdc, (int)(tox - headlen * cos(angle - M_PI / 6)), (int)(toy - headlen * sin(angle - M_PI / 6)), NULL);
+    LineTo(hdc, tox, toy);
+    LineTo(hdc, (int)(tox - headlen * cos(angle + M_PI / 6)), (int)(toy - headlen * sin(angle + M_PI / 6)));
+}
+
 float** randm(int n) {
     srand(2113);
     float** arr = (float**)malloc(n * sizeof(float*));
@@ -168,6 +179,11 @@ void drawGraph(HWND hWnd, HDC hdc)
                         LineTo(hdc, nx[j]+50, ny[i]-(ny[i]-ny[j])/2);
                         MoveToEx(hdc, nx[j]+50, ny[i]-(ny[i]-ny[j])/2, NULL);
                         LineTo(hdc, nx[j], ny[j]);
+                        int dx = nx[j] - nx[j]+50;
+                        int dy = ny[j] - (ny[i]-(ny[i]-ny[j])/2);
+                        float angle = atan2(dy, dx);
+                        printf("%f\n", angle);
+                        arrow(angle*100, nx[j], ny[j], hdc);
                     } else{
                         MoveToEx(hdc, nx[i], ny[i], NULL);
                         LineTo(hdc, nx[j]-50, ny[i]-(ny[i]-ny[j])/2);
@@ -190,24 +206,37 @@ void drawGraph(HWND hWnd, HDC hdc)
             }
         }
     }
-
 */
 
 
 
 
-    int count = 0, atall = 0;
-    for(int i = 0; i < N; i++){//For lines between vertex (must be 56 lines)
-        for(int j = 0; j < N; j++){
-            if(A[i][j] == 1 && i != j && (nx[i] != nx[j] || ny[i] != ny[j])){
-                MoveToEx(hdc, nx[i], ny[i], NULL);
-                LineTo(hdc, nx[j], ny[j]);
-                count++;
+
+    int count1 = 0, count2 = 0, atall = 0;
+    for(int i = 0; i < 8; i++){//For lines between vertex (must be 56 lines)
+        for(int j = 0; j < 8; j++){
+            if(A[i][j] == 1){
+                if(abs(i-j) >=2 && abs(i-j) <= edgeCeil && (nx[i] == nx[j] || ny[i] == ny[j])){
+                    count1++;
+                } else if(i == j){
+                    count2++;
+                } else{
+                    atall++;
+                    if(i > j && A[j][i] == 1){
+                        MoveToEx(hdc, nx[i], ny[i], NULL);
+                        LineTo(hdc, (nx[i]+nx[j])/2+20, (ny[i]+ny[j])/2+20);
+                        MoveToEx(hdc, (nx[i]+nx[j])/2+20, (ny[i]+ny[j])/2+20, NULL);
+                        LineTo(hdc, nx[j], ny[j]);
+                    } else{
+                        MoveToEx(hdc, nx[i], ny[i], NULL);
+                        LineTo(hdc, nx[j], ny[j]);
+                    }
+                }
             }
         }
     }
 
-    printf("%d\n", count);//must output 56
+    //printf("%d %d %d\n", count1, count2, atall);//must output 56
 
     /*
     Arc(hdc, nx[i], ny[i]-40, nx[j], ny[j]+40, nx[j], ny[j], nx[i], ny[i]);
