@@ -51,7 +51,7 @@ float** mulmr(float c, float** mat, int n) {
     for(int i = 0; i < n; i++){
         res[i] = (float*)malloc(n * sizeof(float));
         for(int j = 0; j < n; j++){
-            res[i][j] = roundf(mat[i][j] * c);
+            res[i][j] = floor(mat[i][j] * c);
         }
     }
     return res;
@@ -176,26 +176,26 @@ void drawGraph(HWND hWnd, HDC hdc)
                 if(nx[i] == nx[j]){
                     if(i > j){
                         MoveToEx(hdc, nx[i], ny[i], NULL);
-                        LineTo(hdc, nx[j]+50, ny[i]-(ny[i]-ny[j])/2);
-                        MoveToEx(hdc, nx[j]+50, ny[i]-(ny[i]-ny[j])/2, NULL);
+                        LineTo(hdc, nx[j]+35, ny[i]-(ny[i]-ny[j])/2);
+                        MoveToEx(hdc, nx[j]+35, ny[i]-(ny[i]-ny[j])/2, NULL);
                         LineTo(hdc, nx[j], ny[j]);
                         arrow2(nx[j]+50, ny[i]-(ny[i]-ny[j])/2, nx[j]+dtx, ny[j]+10, hdc);
                     } else{
                         MoveToEx(hdc, nx[i], ny[i], NULL);
-                        LineTo(hdc, nx[j]-50, ny[i]-(ny[i]-ny[j])/2);
-                        MoveToEx(hdc, nx[j]-50, ny[i]-(ny[i]-ny[j])/2, NULL);
+                        LineTo(hdc, nx[j]-35, ny[i]-(ny[i]-ny[j])/2);
+                        MoveToEx(hdc, nx[j]-35, ny[i]-(ny[i]-ny[j])/2, NULL);
                         LineTo(hdc, nx[j], ny[j]);
                     }
                 } else{
                     if(i > j){
                         MoveToEx(hdc, nx[i], ny[i], NULL);
-                        LineTo(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]+50);
-                        MoveToEx(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]+50, NULL);
+                        LineTo(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]+35);
+                        MoveToEx(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]+35, NULL);
                         LineTo(hdc, nx[j], ny[j]);
                     } else{
                         MoveToEx(hdc, nx[i], ny[i], NULL);
-                        LineTo(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-50);
-                        MoveToEx(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-50, NULL);
+                        LineTo(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-35);
+                        MoveToEx(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-35, NULL);
                         LineTo(hdc, nx[j], ny[j]);
                     }
                 }
@@ -207,15 +207,15 @@ void drawGraph(HWND hWnd, HDC hdc)
 
 
 
-/*
+
     int count1 = 0, count2 = 0, atall = 0;
     for(int i = 0; i < N; i++){//For lines between vertex (must be 56 lines)
         for(int j = 0; j < N; j++){
             if(A[i][j] == 1){
                 if(abs(i-j) >=2 && abs(i-j) <= edgeCeil && (nx[i] == nx[j] || ny[i] == ny[j])){
-                    count1++;
+                    atall++;
                 } else if(i == j){
-                    count2++;
+                    atall++;
                 } else{
                     atall++;
                     if(i > j && A[j][i] == 1){
@@ -232,7 +232,9 @@ void drawGraph(HWND hWnd, HDC hdc)
             }
         }
     }
-*/
+
+    printf("%d\n", atall);
+
     HPEN BPen = CreatePen(PS_SOLID, 2, RGB(50, 0, 255));
     HPEN KPen = CreatePen(PS_SOLID, 1, RGB(20, 20, 5));
 
