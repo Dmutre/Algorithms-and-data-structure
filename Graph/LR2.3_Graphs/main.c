@@ -129,7 +129,7 @@ void drawGraph(HWND hWnd, HDC hdc)
     float** T = randm(N);
     float** A = mulmr(0.715, T, N);
 
-    printf("T:\n");
+    printf("T:\n");//Output our start random matrix with value from 0 to 2.0
     for(int i = 0; i < N; i++){
         for(int j = 0; j < N; j++){
             printf("%.2f ", T[i][j]);
@@ -137,7 +137,7 @@ void drawGraph(HWND hWnd, HDC hdc)
         printf("\n");
     }
 
-    printf("A:\n");
+    printf("A:\n");//Output our matrix of dependenses
     for(int i = 0; i < N; i++){
         for(int j = 0; j < N; j++){
             printf("%.0f ", A[i][j]);
@@ -162,7 +162,6 @@ void drawGraph(HWND hWnd, HDC hdc)
         }
     }
 
-
     for(int i = 0; i < N; i++){//For lines when circles are on the same row in X or Y
         for(int j = 0; j < N; j++){
             if(A[i][j] == 1 && abs(i-j) >=2 && abs(i-j) <= edgeCeil && (nx[i] == nx[j] || ny[i] == ny[j])){
@@ -172,11 +171,13 @@ void drawGraph(HWND hWnd, HDC hdc)
                         LineTo(hdc, nx[j]+35, ny[i]-(ny[i]-ny[j])/2);
                         MoveToEx(hdc, nx[j]+35, ny[i]-(ny[i]-ny[j])/2, NULL);
                         LineTo(hdc, nx[j], ny[j]);
+                        drawArrow(nx[j]+35, ny[i]-(ny[i]-ny[j])/2, nx[j], ny[j], dx, hdc);
                     } else{
                         MoveToEx(hdc, nx[i], ny[i], NULL);
                         LineTo(hdc, nx[j]-35, ny[i]-(ny[i]-ny[j])/2);
                         MoveToEx(hdc, nx[j]-35, ny[i]-(ny[i]-ny[j])/2, NULL);
                         LineTo(hdc, nx[j], ny[j]);
+                        drawArrow(nx[j]-35, ny[i]-(ny[i]-ny[j])/2, nx[j], ny[j], dx, hdc);
                     }
                 } else{
                     if(i > j){
@@ -184,11 +185,14 @@ void drawGraph(HWND hWnd, HDC hdc)
                         LineTo(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]+35);
                         MoveToEx(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]+35, NULL);
                         LineTo(hdc, nx[j], ny[j]);
+                        drawArrow(nx[j]+(nx[i]-nx[j])/2, ny[i]+35, nx[j], ny[j], dx, hdc);
+
                     } else{
                         MoveToEx(hdc, nx[i], ny[i], NULL);
                         LineTo(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-35);
                         MoveToEx(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-35, NULL);
                         LineTo(hdc, nx[j], ny[j]);
+                        drawArrow(nx[j]+(nx[i]-nx[j])/2, ny[i]-35, nx[j], ny[j], dx, hdc);
                     }
                 }
             }
@@ -205,16 +209,17 @@ void drawGraph(HWND hWnd, HDC hdc)
         for(int j = 0; j < N; j++){
             if(A[i][j] == 1){
                 if(abs(i-j) >=2 && abs(i-j) <= edgeCeil && (nx[i] == nx[j] || ny[i] == ny[j])){
-                    atall++;
+                    //atall++;
                 } else if(i == j){
-                    atall++;
+                    //atall++;
                 } else{
-                    atall++;
+                    //atall++;
                     if(i > j && A[j][i] == 1){
                         MoveToEx(hdc, nx[i], ny[i], NULL);
                         LineTo(hdc, (nx[i]+nx[j])/2+20, (ny[i]+ny[j])/2);
                         MoveToEx(hdc, (nx[i]+nx[j])/2+20, (ny[i]+ny[j])/2, NULL);
                         LineTo(hdc, nx[j], ny[j]);
+                        drawArrow((nx[i]+nx[j])/2+20, (ny[i]+ny[j])/2, nx[j], ny[j], dx, hdc);
 
                     } else{
                         MoveToEx(hdc, nx[i], ny[i], NULL);
