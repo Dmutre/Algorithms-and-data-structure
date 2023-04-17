@@ -9,29 +9,22 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 char ProgName[] = "Лабораторна робота 3";
 
 void arrow(float fi, int px, int py, HDC hdc){
-    fi = 3.1416 * (180.0 - fi) / 180.0;
     int lx, ly, rx, ry;
-    lx = px + 15 * cos(fi + 0.3);
-    rx = px + 15 * cos(fi - 0.3);
-    ly = py + 15 * sin(fi + 0.3);
-    ry = py + 15 * sin(fi - 0.3);
-    MoveToEx(hdc, px, py, NULL);
-    LineTo(hdc, px, py);
-    LineTo(hdc, rx, ry);
+    lx = px - 15 * cos(fi + 0.3);
+    rx = px - 15 * cos(fi - 0.3);
+    ly = py - 15 * sin(fi + 0.3);
+    ry = py - 15 * sin(fi - 0.3);
     MoveToEx(hdc, px, py, NULL);
     LineTo(hdc, lx, ly);
-    return 0;
+    MoveToEx(hdc, px, py, NULL);
+    LineTo(hdc, rx, ry);
 }
 
-void arrow2(int fromx, int fromy, int tox, int toy, HDC hdc) {
-    int dx = tox - fromx;
-    int dy = toy - fromy;
-    float headlen = 20.0;
-    float angle = atan2(dy, dx);
-    MoveToEx(hdc, tox, toy, NULL);
-    MoveToEx(hdc, (int)(tox - headlen * cos(angle - M_PI / 6)), (int)(toy - headlen * sin(angle - M_PI / 6)), NULL);
-    LineTo(hdc, tox, toy);
-    LineTo(hdc, (int)(tox - headlen * cos(angle + M_PI / 6)), (int)(toy - headlen * sin(angle + M_PI / 6)));
+void drawArrow(int fromx, int fromy, int tox, int toy, int r, HDC hdc){
+    float angleRad = atan2((toy-fromy), (tox-fromx));
+    float px = tox - r*cos(angleRad);
+    float py = toy - r*sin(angleRad);
+    arrow(angleRad, px, py, hdc);
 }
 
 float** randm(int n) {
@@ -82,7 +75,7 @@ void arrayX(int N, int* array){
         array[i] = array[i-1]-100;
     }
 
-    for(int i = edgeCeil*3+1; i < edgeCeil*4-1 && i < N; i++){
+    for(int i = edgeCeil*3+1; i < edgeCeil*4 && i < N; i++){
         array[i] = array[0];
     }
 }
@@ -103,7 +96,7 @@ void arrayY(int N, int* array){
         array[i] = array[i-1];
     }
 
-    for(int i = edgeCeil*3+1; i < edgeCeil*4-1 && i < N; i++){
+    for(int i = edgeCeil*3+1; i < edgeCeil*4 && i < N; i++){
         array[i] = array[i-1]-100;
     }
 }
@@ -179,7 +172,6 @@ void drawGraph(HWND hWnd, HDC hdc)
                         LineTo(hdc, nx[j]+35, ny[i]-(ny[i]-ny[j])/2);
                         MoveToEx(hdc, nx[j]+35, ny[i]-(ny[i]-ny[j])/2, NULL);
                         LineTo(hdc, nx[j], ny[j]);
-                        arrow2(nx[j]+50, ny[i]-(ny[i]-ny[j])/2, nx[j]+dtx, ny[j]+10, hdc);
                     } else{
                         MoveToEx(hdc, nx[i], ny[i], NULL);
                         LineTo(hdc, nx[j]-35, ny[i]-(ny[i]-ny[j])/2);
@@ -227,6 +219,7 @@ void drawGraph(HWND hWnd, HDC hdc)
                     } else{
                         MoveToEx(hdc, nx[i], ny[i], NULL);
                         LineTo(hdc, nx[j], ny[j]);
+                        drawArrow(nx[i], ny[i], nx[j], ny[j], dx, hdc);
                     }
                 }
             }
