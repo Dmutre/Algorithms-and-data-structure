@@ -151,11 +151,21 @@ void drawGraph(HWND hWnd, HDC hdc)
                 if(i == j){
                     int dir = (int) ceil((i+1)/(float) edgeCeil);
                     if(dir%2 == 0){
-                        if(dir > edgeCeil) Ellipse(hdc, nx[i]-40, ny[i]-20, nx[i], ny[i]+20);
-                        else Ellipse(hdc, nx[i]+40, ny[i]-20, nx[i], ny[i]+20);
+                        if(dir > edgeCeil){
+                            Ellipse(hdc, nx[i]-40, ny[i]-20, nx[i], ny[i]+20);
+                            drawArrow(nx[i]-35, ny[i]+50, nx[j], ny[j], dx, hdc);
+                        } else{
+                            Ellipse(hdc, nx[i]+40, ny[i]-20, nx[i], ny[i]+20);
+                            drawArrow(nx[i]+35, ny[i]-50, nx[j], ny[j], dx, hdc);
+                        }
                     } else{
-                        if(dir >= edgeCeil) Ellipse(hdc, nx[i]-20, ny[i]+40, nx[i]+20, ny[i]);
-                        else Ellipse(hdc, nx[i]-20, ny[i]-40, nx[i]+20, ny[i]);
+                        if(dir >= edgeCeil){
+                            Ellipse(hdc, nx[i]-20, ny[i]+40, nx[i]+20, ny[i]);
+                            drawArrow(nx[i]+70, ny[i]+45, nx[j], ny[j], dx, hdc);
+                        } else{
+                            Ellipse(hdc, nx[i]-20, ny[i]-40, nx[i]+20, ny[i]);
+                            drawArrow(nx[i]-70, ny[i]-45, nx[j], ny[j], dx, hdc);
+                        }
                     }
                 }
             }
@@ -245,7 +255,7 @@ void drawGraph(HWND hWnd, HDC hdc)
         free(T[i]);
         free(A[i]);
     }
-    free(T);
+    free(T);//To avoid problems with dynamic memory we free out matrix in the end of our programme
     free(A);
 }
 
@@ -268,7 +278,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
     HWND hWnd;
     MSG lpMsg;
 
-    hWnd = CreateWindow(ProgName, "Лабораторна робота 3. Виконав Д. М. Лесько", WS_OVERLAPPEDWINDOW, 100, 100, 600, 500, (HWND)NULL, (HMENU)NULL, (HINSTANCE)hInstance, (HINSTANCE)NULL);
+    hWnd = CreateWindow(ProgName, "Лабораторна робота 3. Виконав Д. М. Лесько", WS_OVERLAPPEDWINDOW, 100, 100, 800, 700, (HWND)NULL, (HMENU)NULL, (HINSTANCE)hInstance, (HINSTANCE)NULL);
     ShowWindow(hWnd, nCmdShow);
     while(GetMessage(&lpMsg, hWnd, 0, 0)){
         TranslateMessage(&lpMsg);
