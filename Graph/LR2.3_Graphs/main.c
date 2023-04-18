@@ -104,30 +104,29 @@ void arrayY(int N, int* array){
 void drawGraph(HWND hWnd, HDC hdc)
 {
     const int N = 11;//Number of our vertex
-    float edge = N / 4.0;
-    int edgeCeil = ceil(edge);//Number of vertex, that we can draw four time to get squer
+    int edgeCeil = ceil(N / 4.0);//Number of vertex, that we can draw four time to get squer
     //int nx[11] = {100, 200, 300, 400, 400, 400, 400, 300, 200, 100, 100};
     //int ny[11] = {100, 100, 100, 100, 200, 300, 400, 400, 400, 400, 300};
     int nx[N], ny[N];
     char** nn = symbolArray(N);
     arrayX(N, nx);
     arrayY(N, ny);
-    for(int i = 0; i < N; i++){
+    for(int i = 0; i < N; i++){//Output names of our vertexes
         printf("%s ", nn[i]);
     }
     printf("%\n");
-    for(int i = 0; i < N; i++){
+    for(int i = 0; i < N; i++){//Output coordinates of vertexes for X
         printf("%d ", nx[i]);
     }
     printf("%\n");
-    for(int i = 0; i < N; i++){
+    for(int i = 0; i < N; i++){//Output coordinates of vertexes for Y
         printf("%d ", ny[i]);
     }
     printf("\n");
     int dx = 16, dy = 16, dtx = 5;
 
     float** T = randm(N);
-    float** A = mulmr(0.715, T, N);
+    float** A = mulmr(0.715, T, N);//Fill our matrix
 
     printf("T:\n");//Output our start random matrix with value from 0 to 2.0
     for(int i = 0; i < N; i++){
@@ -137,7 +136,7 @@ void drawGraph(HWND hWnd, HDC hdc)
         printf("\n");
     }
 
-    printf("A:\n");//Output our matrix of dependenses
+    printf("A:\n");//Output our matrix of dependencies
     for(int i = 0; i < N; i++){
         for(int j = 0; j < N; j++){
             printf("%.0f ", A[i][j]);
@@ -145,7 +144,7 @@ void drawGraph(HWND hWnd, HDC hdc)
         printf("\n");
     }
 
-    for(int i = 0; i < N; i++){//For elipses
+    for(int i = 0; i < N; i++){//For ellipses
         for(int j = 0; j < N; j++){
             if(A[i][j] == 1){
                 if(i == j){
@@ -214,8 +213,8 @@ void drawGraph(HWND hWnd, HDC hdc)
 
 
 
-    int count1 = 0, count2 = 0, atall = 0;
-    for(int i = 0; i < N; i++){//For lines between vertex (must be 56 lines)
+    int atall = 0;
+    for(int i = 0; i < N; i++){//For lines between vertex
         for(int j = 0; j < N; j++){
             if(A[i][j] == 1){
                 if(abs(i-j) >=2 && abs(i-j) <= edgeCeil && (nx[i] == nx[j] || ny[i] == ny[j])){
