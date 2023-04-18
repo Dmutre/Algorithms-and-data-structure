@@ -101,9 +101,109 @@ void arrayY(int N, int* array){
     }
 }
 
+void drawUnDependenceGraph(HWND hWnd, HDC hdc, int n, char** nn, int nx[], int ny[], float** A){
+    int edgeCeil = ceil(n / 4.0);//Number of vertex, that we can draw four time to get squer
+    int step = (edgeCeil + 2) * 100;// Distance on which we replace our vertex (in OX)
+
+    for(int i = 0; i < n; i++){//Change and output coordinates of vertexes for X to draw Undependence graph
+        nx[i] = nx[i] + step;
+        printf("%d ", nx[i]);
+    }
+    printf("\n");
+
+    int dx = 16, dy = 16, dtx = 5;
+    HPEN KPen = CreatePen(PS_SOLID, 1, RGB(20, 20, 5));
+    SelectObject(hdc, KPen);
+
+    for(int i = 0; i < n; i++){//For ellipses
+        for(int j = 0; j < n; j++){
+            if(A[i][j] == 1){
+                if(i == j){
+                    int dir = (int) ceil((i+1)/(float) edgeCeil);
+                    if(dir%2 == 0){
+                        if(dir > edgeCeil){
+                            Ellipse(hdc, nx[i]-40, ny[i]-20, nx[i], ny[i]+20);
+                        } else{
+                            Ellipse(hdc, nx[i]+40, ny[i]-20, nx[i], ny[i]+20);
+                        }
+                    } else{
+                        if(dir >= edgeCeil){
+                            Ellipse(hdc, nx[i]-20, ny[i]+40, nx[i]+20, ny[i]);
+                        } else{
+                            Ellipse(hdc, nx[i]-20, ny[i]-40, nx[i]+20, ny[i]);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    for(int i = 0; i < n; i++){//For lines when circles are on the same row in X or Y
+        for(int j = 0; j < n; j++){
+            if(A[i][j] == 1 && abs(i-j) >=2 && abs(i-j) <= edgeCeil && (nx[i] == nx[j] || ny[i] == ny[j])){
+                if(nx[i] == nx[j]){
+                    if(i > j){
+                        MoveToEx(hdc, nx[i], ny[i], NULL);
+                        LineTo(hdc, nx[j]+35, ny[i]-(ny[i]-ny[j])/2);
+                        MoveToEx(hdc, nx[j]+35, ny[i]-(ny[i]-ny[j])/2, NULL);
+                        LineTo(hdc, nx[j], ny[j]);
+                    } else{
+                        MoveToEx(hdc, nx[i], ny[i], NULL);
+                        LineTo(hdc, nx[j]-35, ny[i]-(ny[i]-ny[j])/2);
+                        MoveToEx(hdc, nx[j]-35, ny[i]-(ny[i]-ny[j])/2, NULL);
+                        LineTo(hdc, nx[j], ny[j]);
+                    }
+                } else{
+                    if(i > j){
+                        MoveToEx(hdc, nx[i], ny[i], NULL);
+                        LineTo(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]+35);
+                        MoveToEx(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]+35, NULL);
+                        LineTo(hdc, nx[j], ny[j]);
+
+                    } else{
+                        MoveToEx(hdc, nx[i], ny[i], NULL);
+                        LineTo(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-35);
+                        MoveToEx(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-35, NULL);
+                        LineTo(hdc, nx[j], ny[j]);
+                    }
+                }
+            }
+        }
+    }
+
+    for(int i = 0; i < n; i++){//For lines between vertex
+        for(int j = 0; j < n; j++){
+            if(A[i][j] == 1){
+                if(abs(i-j) >=2 && abs(i-j) <= edgeCeil && (nx[i] == nx[j] || ny[i] == ny[j])){
+                } else if(i == j){
+                } else{
+                    if(i > j && A[j][i] == 1){
+                        MoveToEx(hdc, nx[i], ny[i], NULL);
+                        LineTo(hdc, (nx[i]+nx[j])/2+20, (ny[i]+ny[j])/2);
+                        MoveToEx(hdc, (nx[i]+nx[j])/2+20, (ny[i]+ny[j])/2, NULL);
+                        LineTo(hdc, nx[j], ny[j]);
+                    } else{
+                        MoveToEx(hdc, nx[i], ny[i], NULL);
+                        LineTo(hdc, nx[j], ny[j]);
+                    }
+                }
+            }
+        }
+    }
+
+    HPEN BPen = CreatePen(PS_SOLID, 2, RGB(50, 0, 255));
+    //HPEN KPen = CreatePen(PS_SOLID, 1, RGB(20, 20, 5));
+
+    SelectObject(hdc, BPen);
+    for(int i = 0;i < n; i++){
+        Ellipse(hdc, nx[i]-dx,ny[i]-dy,nx[i]+dx,ny[i]+dy);
+        TextOut(hdc, nx[i]-dtx,ny[i]-dy/2, nn[i],2);
+    }
+}
+
 void drawGraph(HWND hWnd, HDC hdc)
 {
-    const int N = 11;//Number of our vertex
+    const int N = 4;//Number of our vertex
     int edgeCeil = ceil(N / 4.0);//Number of vertex, that we can draw four time to get squer
     //int nx[11] = {100, 200, 300, 400, 400, 400, 400, 300, 200, 100, 100};
     //int ny[11] = {100, 100, 100, 100, 200, 300, 400, 400, 400, 400, 300};
@@ -208,11 +308,6 @@ void drawGraph(HWND hWnd, HDC hdc)
         }
     }
 
-
-
-
-
-
     int atall = 0;
     for(int i = 0; i < N; i++){//For lines between vertex
         for(int j = 0; j < N; j++){
@@ -250,6 +345,9 @@ void drawGraph(HWND hWnd, HDC hdc)
         Ellipse(hdc, nx[i]-dx,ny[i]-dy,nx[i]+dx,ny[i]+dy);
         TextOut(hdc, nx[i]-dtx,ny[i]-dy/2, nn[i],2);
     }
+
+    drawUnDependenceGraph(hWnd, hdc, N, nn, nx, ny, A);
+
     for(int i = 0; i < N; i++){
         free(T[i]);
         free(A[i]);
@@ -277,7 +375,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
     HWND hWnd;
     MSG lpMsg;
 
-    hWnd = CreateWindow(ProgName, "Лабораторна робота 3. Виконав Д. М. Лесько", WS_OVERLAPPEDWINDOW, 100, 100, 800, 700, (HWND)NULL, (HMENU)NULL, (HINSTANCE)hInstance, (HINSTANCE)NULL);
+    hWnd = CreateWindow(ProgName, "Лабораторна робота 3. Виконав Д. М. Лесько", WS_OVERLAPPEDWINDOW, 100, 100, 1200, 700, (HWND)NULL, (HMENU)NULL, (HINSTANCE)hInstance, (HINSTANCE)NULL);
     ShowWindow(hWnd, nCmdShow);
     while(GetMessage(&lpMsg, hWnd, 0, 0)){
         TranslateMessage(&lpMsg);
