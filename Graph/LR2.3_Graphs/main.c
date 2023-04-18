@@ -141,8 +141,9 @@ void drawUnDependenceGraph(HWND hWnd, HDC hdc, int n, char** nn, int nx[], int n
     for(int i = 0; i < n; i++){//For lines when circles are on the same row in X or Y
         for(int j = 0; j < n; j++){
             if(A[i][j] == 1 && abs(i-j) >=2 && abs(i-j) <= edgeCeil && (nx[i] == nx[j] || ny[i] == ny[j])){
+                int dir = (int) ceil((i+1)/(float) edgeCeil);
                 if(nx[i] == nx[j]){
-                    if(i > j){
+                    if(dir == 2){
                         MoveToEx(hdc, nx[i], ny[i], NULL);
                         LineTo(hdc, nx[j]+35, ny[i]-(ny[i]-ny[j])/2);
                         MoveToEx(hdc, nx[j]+35, ny[i]-(ny[i]-ny[j])/2, NULL);
@@ -154,16 +155,15 @@ void drawUnDependenceGraph(HWND hWnd, HDC hdc, int n, char** nn, int nx[], int n
                         LineTo(hdc, nx[j], ny[j]);
                     }
                 } else{
-                    if(i > j){
-                        MoveToEx(hdc, nx[i], ny[i], NULL);
-                        LineTo(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]+35);
-                        MoveToEx(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]+35, NULL);
-                        LineTo(hdc, nx[j], ny[j]);
-
-                    } else{
+                    if(dir == 1){
                         MoveToEx(hdc, nx[i], ny[i], NULL);
                         LineTo(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-35);
                         MoveToEx(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-35, NULL);
+                        LineTo(hdc, nx[j], ny[j]);
+                    } else{
+                        MoveToEx(hdc, nx[i], ny[i], NULL);
+                        LineTo(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]+35);
+                        MoveToEx(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]+35, NULL);
                         LineTo(hdc, nx[j], ny[j]);
                     }
                 }
@@ -177,22 +177,14 @@ void drawUnDependenceGraph(HWND hWnd, HDC hdc, int n, char** nn, int nx[], int n
                 if(abs(i-j) >=2 && abs(i-j) <= edgeCeil && (nx[i] == nx[j] || ny[i] == ny[j])){
                 } else if(i == j){
                 } else{
-                    if(i > j && A[j][i] == 1){
-                        MoveToEx(hdc, nx[i], ny[i], NULL);
-                        LineTo(hdc, (nx[i]+nx[j])/2+20, (ny[i]+ny[j])/2);
-                        MoveToEx(hdc, (nx[i]+nx[j])/2+20, (ny[i]+ny[j])/2, NULL);
-                        LineTo(hdc, nx[j], ny[j]);
-                    } else{
-                        MoveToEx(hdc, nx[i], ny[i], NULL);
-                        LineTo(hdc, nx[j], ny[j]);
-                    }
+                    MoveToEx(hdc, nx[i], ny[i], NULL);
+                    LineTo(hdc, nx[j], ny[j]);
                 }
             }
         }
     }
 
     HPEN BPen = CreatePen(PS_SOLID, 2, RGB(50, 0, 255));
-    //HPEN KPen = CreatePen(PS_SOLID, 1, RGB(20, 20, 5));
 
     SelectObject(hdc, BPen);
     for(int i = 0;i < n; i++){
@@ -201,9 +193,8 @@ void drawUnDependenceGraph(HWND hWnd, HDC hdc, int n, char** nn, int nx[], int n
     }
 }
 
-void drawGraph(HWND hWnd, HDC hdc)
-{
-    const int N = 4;//Number of our vertex
+void drawGraph(HWND hWnd, HDC hdc){
+    const int N = 14;//Number of our vertex
     int edgeCeil = ceil(N / 4.0);//Number of vertex, that we can draw four time to get squer
     //int nx[11] = {100, 200, 300, 400, 400, 400, 400, 300, 200, 100, 100};
     //int ny[11] = {100, 100, 100, 100, 200, 300, 400, 400, 400, 400, 300};
