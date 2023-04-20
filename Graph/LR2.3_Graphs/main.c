@@ -104,12 +104,22 @@ void arrayY(int N, int* array){
 void drawUnDependenceGraph(HWND hWnd, HDC hdc, int n, char** nn, int nx[], int ny[], float** A){
     int edgeCeil = ceil(n / 4.0);//Number of vertex, that we can draw four time to get squer
     int step = (edgeCeil + 2) * 100;// Distance on which we replace our vertex (in OX)
-
+    printf("X coordinates for undirected graph: ");
     for(int i = 0; i < n; i++){//Change and output coordinates of vertexes for X to draw Undependence graph
         nx[i] = nx[i] + step;
         printf("%d ", nx[i]);
     }
     printf("\n");
+
+    printf("Undirected A matrix:\n");//Output our matrix of dependencies
+    for(int i = 0; i < n; i++){
+        for(int j = 0; j < n; j++){
+            if(A[j][i] == 1 || A[i][j] == 1){
+                printf("1 ");
+            } else printf("%.0f ", A[i][j]);
+        }
+        printf("\n");
+    }
 
     int dx = 16, dy = 16, dtx = 5;
     HPEN KPen = CreatePen(PS_SOLID, 1, RGB(20, 20, 5));
@@ -194,22 +204,21 @@ void drawUnDependenceGraph(HWND hWnd, HDC hdc, int n, char** nn, int nx[], int n
 }
 
 void drawGraph(HWND hWnd, HDC hdc){
-    const int N = 14;//Number of our vertex
+    const int N = 11;//Number of our vertex
     int edgeCeil = ceil(N / 4.0);//Number of vertex, that we can draw four time to get squer
-    //int nx[11] = {100, 200, 300, 400, 400, 400, 400, 300, 200, 100, 100};
-    //int ny[11] = {100, 100, 100, 100, 200, 300, 400, 400, 400, 400, 300};
     int nx[N], ny[N];
     char** nn = symbolArray(N);
     arrayX(N, nx);
     arrayY(N, ny);
+    printf("Vertex`s name: ");
     for(int i = 0; i < N; i++){//Output names of our vertexes
         printf("%s ", nn[i]);
     }
-    printf("%\n");
+    printf("%\nX coordinates: ");
     for(int i = 0; i < N; i++){//Output coordinates of vertexes for X
         printf("%d ", nx[i]);
     }
-    printf("%\n");
+    printf("%\nY coordinates");
     for(int i = 0; i < N; i++){//Output coordinates of vertexes for Y
         printf("%d ", ny[i]);
     }
@@ -304,11 +313,11 @@ void drawGraph(HWND hWnd, HDC hdc){
         for(int j = 0; j < N; j++){
             if(A[i][j] == 1){
                 if(abs(i-j) >=2 && abs(i-j) <= edgeCeil && (nx[i] == nx[j] || ny[i] == ny[j])){
-                    //atall++;
+                    atall++;
                 } else if(i == j){
-                    //atall++;
+                    atall++;
                 } else{
-                    //atall++;
+                    atall++;
                     if(i > j && A[j][i] == 1){
                         MoveToEx(hdc, nx[i], ny[i], NULL);
                         LineTo(hdc, (nx[i]+nx[j])/2+20, (ny[i]+ny[j])/2);
@@ -326,7 +335,7 @@ void drawGraph(HWND hWnd, HDC hdc){
         }
     }
 
-    printf("%d\n", atall);
+    printf("Number of all dependences: %d\n", atall);
 
     HPEN BPen = CreatePen(PS_SOLID, 2, RGB(50, 0, 255));
     HPEN KPen = CreatePen(PS_SOLID, 1, RGB(20, 20, 5));
@@ -345,6 +354,7 @@ void drawGraph(HWND hWnd, HDC hdc){
     }
     free(T);//To avoid problems with dynamic memory we free out matrix in the end of our programme
     free(A);
+    free(nn);
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow){
