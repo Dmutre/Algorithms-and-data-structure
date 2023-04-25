@@ -153,29 +153,15 @@ void drawUnDependenceGraph(HWND hWnd, HDC hdc, int n, char** nn, int nx[], int n
             if(A[i][j] == 1 && abs(i-j) >=2 && abs(i-j) <= edgeCeil && (nx[i] == nx[j] || ny[i] == ny[j])){
                 int dir = (int) ceil((i+1)/(float) edgeCeil);
                 if(nx[i] == nx[j]){
-                    if(dir == 2){
-                        MoveToEx(hdc, nx[i], ny[i], NULL);
-                        LineTo(hdc, nx[j]+35, ny[i]-(ny[i]-ny[j])/2);
-                        MoveToEx(hdc, nx[j]+35, ny[i]-(ny[i]-ny[j])/2, NULL);
-                        LineTo(hdc, nx[j], ny[j]);
-                    } else{
-                        MoveToEx(hdc, nx[i], ny[i], NULL);
-                        LineTo(hdc, nx[j]-35, ny[i]-(ny[i]-ny[j])/2);
-                        MoveToEx(hdc, nx[j]-35, ny[i]-(ny[i]-ny[j])/2, NULL);
-                        LineTo(hdc, nx[j], ny[j]);
-                    }
+                    MoveToEx(hdc, nx[i], ny[i], NULL);
+                    LineTo(hdc, nx[j]+35, ny[i]-(ny[i]-ny[j])/2);
+                    MoveToEx(hdc, nx[j]+35, ny[i]-(ny[i]-ny[j])/2, NULL);
+                    LineTo(hdc, nx[j], ny[j]);
                 } else{
-                    if(dir == 1){
-                        MoveToEx(hdc, nx[i], ny[i], NULL);
-                        LineTo(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-35);
-                        MoveToEx(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-35, NULL);
-                        LineTo(hdc, nx[j], ny[j]);
-                    } else{
-                        MoveToEx(hdc, nx[i], ny[i], NULL);
-                        LineTo(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]+35);
-                        MoveToEx(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]+35, NULL);
-                        LineTo(hdc, nx[j], ny[j]);
-                    }
+                    MoveToEx(hdc, nx[i], ny[i], NULL);
+                    LineTo(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-35);
+                    MoveToEx(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-35, NULL);
+                    LineTo(hdc, nx[j], ny[j]);
                 }
             }
         }
