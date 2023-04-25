@@ -7,7 +7,8 @@
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-HWND buttonDrawDirect, buttonDrawUnd;
+//Declare our buttons
+HWND buttonDrawDirect, buttonDrawUnd, buttonPower;
 
 char ProgName[] = "Лабораторна робота 3";
 
@@ -40,14 +41,6 @@ float** randm(int n) {
         }
     }
 
-    printf("T:\n");//Output our start random matrix with value from 0 to 2.0
-    for(int i = 0; i < n; i++){
-        for(int j = 0; j < n; j++){
-            printf("%.2f ", arr[i][j]);
-        }
-        printf("\n");
-    }
-
     return arr;
 }
 
@@ -58,14 +51,6 @@ float** mulmr(float c, float** mat, int n) {
         for(int j = 0; j < n; j++){
             res[i][j] = floor(mat[i][j] * c);
         }
-    }
-
-    printf("A:\n");//Output our matrix of dependencies
-    for(int i = 0; i < n; i++){
-        for(int j = 0; j < n; j++){
-            printf("%.0f ", res[i][j]);
-        }
-        printf("\n");
     }
 
     return res;
@@ -92,11 +77,12 @@ float** makeSymmetric(float** mat, int n){
             }
         }
     }
+}
 
-    printf("symmetric A:\n");//Output our start random matrix with value from 0 to 2.0
-    for(int i = 0; i < n; i++){
-        for(int j = 0; j < n; j++){
-            printf("%.0f ", arr[i][j]);
+void printMatrix(float** mat, int N){
+    for(int i = 0; i < N; i++){
+        for(int j = 0; j < N; j++){
+            printf("%.0f ", mat[i][j]);
         }
         printf("\n");
     }
@@ -105,9 +91,10 @@ float** makeSymmetric(float** mat, int n){
 void arrayX(int N, int* array){
     float edge = N / 4.0;
     int edgeCeil = ceil(edge);
+    int stepRigth = 200;
 
     for(int i = 0; i < edgeCeil+1; i++){
-        array[i] = 100 + 100*i;
+        array[i] = 100 + 100*i + stepRigth;
     }
 
     for(int i = edgeCeil+1; i < edgeCeil*2+1; i++){
@@ -147,11 +134,6 @@ void arrayY(int N, int* array){
 
 void drawUnDependenceGraph(HWND hWnd, HDC hdc, int n, char** nn, int nx[], int ny[], float** A){
     int edgeCeil = ceil(n / 4.0);//Number of vertex, that we can draw four time to get squer
-    int step = (edgeCeil + 2) * 100;// Distance on which we replace our vertex (in OX)
-    for(int i = 0; i < n; i++){//Change and output coordinates of vertexes for X to draw Undependence graph
-        nx[i] = nx[i] + step;
-    }
-
     int dx = 16, dy = 16, dtx = 5;
     HPEN KPen = CreatePen(PS_SOLID, 1, RGB(20, 20, 5));
     SelectObject(hdc, KPen);
@@ -184,29 +166,15 @@ void drawUnDependenceGraph(HWND hWnd, HDC hdc, int n, char** nn, int nx[], int n
             if(A[i][j] == 1 && abs(i-j) >=2 && abs(i-j) <= edgeCeil && (nx[i] == nx[j] || ny[i] == ny[j])){
                 int dir = (int) ceil((i+1)/(float) edgeCeil);
                 if(nx[i] == nx[j]){
-                    if(dir == 2){
-                        MoveToEx(hdc, nx[i], ny[i], NULL);
-                        LineTo(hdc, nx[j]+35, ny[i]-(ny[i]-ny[j])/2);
-                        MoveToEx(hdc, nx[j]+35, ny[i]-(ny[i]-ny[j])/2, NULL);
-                        LineTo(hdc, nx[j], ny[j]);
-                    } else{
-                        MoveToEx(hdc, nx[i], ny[i], NULL);
-                        LineTo(hdc, nx[j]-35, ny[i]-(ny[i]-ny[j])/2);
-                        MoveToEx(hdc, nx[j]-35, ny[i]-(ny[i]-ny[j])/2, NULL);
-                        LineTo(hdc, nx[j], ny[j]);
-                    }
+                    MoveToEx(hdc, nx[i], ny[i], NULL);
+                    LineTo(hdc, nx[j]+35, ny[i]-(ny[i]-ny[j])/2);
+                    MoveToEx(hdc, nx[j]+35, ny[i]-(ny[i]-ny[j])/2, NULL);
+                    LineTo(hdc, nx[j], ny[j]);
                 } else{
-                    if(dir == 1){
-                        MoveToEx(hdc, nx[i], ny[i], NULL);
-                        LineTo(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-35);
-                        MoveToEx(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-35, NULL);
-                        LineTo(hdc, nx[j], ny[j]);
-                    } else{
-                        MoveToEx(hdc, nx[i], ny[i], NULL);
-                        LineTo(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]+35);
-                        MoveToEx(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]+35, NULL);
-                        LineTo(hdc, nx[j], ny[j]);
-                    }
+                    MoveToEx(hdc, nx[i], ny[i], NULL);
+                    LineTo(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-35);
+                    MoveToEx(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-35, NULL);
+                    LineTo(hdc, nx[j], ny[j]);
                 }
             }
         }
@@ -361,6 +329,10 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
             break;
         case 2:
             drawUnDependenceGraph(hWnd, hdc, N, nn, nx, ny, A);
+            break;
+        case 3:
+            printf("Hello 3th option\n");
+            break;
     }
 
     for(int i = 0; i < N; i++){
@@ -370,6 +342,17 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
     free(T);//To avoid problems with dynamic memory we free out matrix in the end of our programme
     free(A);
     free(nn);
+}
+
+void windowUpdate(HWND hWnd, HDC hdc, PAINTSTRUCT ps, int option){
+    InvalidateRect(hWnd, NULL, TRUE);
+    HBRUSH hBrush = CreateSolidBrush(RGB(255, 255, 255)); // replace RGB(255, 255, 255) with desired background color
+    UpdateWindow(hWnd);//Update our app window to make possible to draw new graph
+    system("cls");//clear console
+    hdc = BeginPaint(hWnd, &ps);
+    FillRect(hdc, &ps.rcPaint, hBrush);
+    mainFunc(option, hWnd, hdc);//Call main function that call needed functions
+    EndPaint(hWnd, &ps);
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow){
@@ -406,38 +389,34 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam){
     PAINTSTRUCT ps;
     switch(messg){
         case WM_CREATE:
+
             buttonDrawDirect = CreateWindow("BUTTON",
                                   "Draw directed graph",
                                   WS_VISIBLE | WS_CHILD | WS_BORDER,
-                                  20, 20, 150, 20,
+                                  20, 20, 150, 30,
                                   hWnd, (HMENU) 1, NULL, NULL);
             buttonDrawUnd = CreateWindow("BUTTON",
                                   "Draw undirected graph",
                                   WS_VISIBLE | WS_CHILD | WS_BORDER,
-                                  20, 40, 150, 20,
+                                  20, 50, 150, 30,
                                   hWnd, (HMENU) 2, NULL, NULL);
+            buttonPower = CreateWindow("BUTTON",
+                                  "Power of graph",
+                                  WS_VISIBLE | WS_CHILD | WS_BORDER,
+                                  20, 80, 150, 30,
+                                  hWnd, (HMENU) 3, NULL, NULL);
             break;
         case WM_COMMAND:
 
             switch(LOWORD(wParam)){
                 case 1:
-                    InvalidateRect(hWnd, NULL, TRUE);
-                    UpdateWindow(hWnd);
-                    system("cls");
-                    hdc = BeginPaint(hWnd, &ps);
-                    HBRUSH hBrush = CreateSolidBrush(RGB(255, 255, 255)); // replace RGB(255, 255, 255) with your desired background color
-                    FillRect(hdc, &ps.rcPaint, hBrush);
-                    mainFunc(1, hWnd, hdc);
-                    EndPaint(hWnd, &ps);
+                    windowUpdate(hWnd, hdc, ps, 1);
                     break;
                 case 2:
-                    InvalidateRect(hWnd, NULL, TRUE);
-                    UpdateWindow(hWnd);
-                    system("cls");
-                    hdc = BeginPaint(hWnd, &ps);
-                    FillRect(hdc, &ps.rcPaint, hBrush);
-                    mainFunc(2, hWnd, hdc);
-                    EndPaint(hWnd, &ps);
+                    windowUpdate(hWnd, hdc, ps, 2);
+                    break;
+                case 3:
+                    windowUpdate(hWnd, hdc, ps, 3);
                     break;
             }
             break;
