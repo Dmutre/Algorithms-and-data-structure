@@ -2,11 +2,12 @@
 #include <stdlib.h>
 #include <windows.h>
 #include <math.h>
+#include<conio.h>
 
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-HWND button;
+HWND buttonDrawDirect, buttonDrawUnd;
 
 char ProgName[] = "Лабораторна робота 3";
 
@@ -233,20 +234,9 @@ void drawUnDependenceGraph(HWND hWnd, HDC hdc, int n, char** nn, int nx[], int n
     }
 }
 
-void drawGraph(HWND hWnd, HDC hdc){
-    const int N = 11;//Number of our vertex
+void drawGraph(HWND hWnd, HDC hdc, int N, int nx[], int ny[], char** nn, float** A){
     int edgeCeil = ceil(N / 4.0);//Number of vertex, that we can draw four time to get squer
-    int nx[N], ny[N];
-    char** nn = symbolArray(N);
-    arrayX(N, nx);
-    arrayY(N, ny);
-
     int dx = 16, dy = 16, dtx = 5;
-
-    float** T = randm(N);
-    float** A = mulmr(0.66, T, N);//Fill our matrix
-    float** symA = makeSymmetric(A, N);
-
 
     for(int i = 0; i < N; i++){//For ellipses
         for(int j = 0; j < N; j++){
@@ -349,8 +339,29 @@ void drawGraph(HWND hWnd, HDC hdc){
         Ellipse(hdc, nx[i]-dx,ny[i]-dy,nx[i]+dx,ny[i]+dy);
         TextOut(hdc, nx[i]-dtx,ny[i]-dy/2, nn[i],2);
     }
+}
 
-    drawUnDependenceGraph(hWnd, hdc, N, nn, nx, ny, A);
+void mainFunc(int option, HWND hWnd, HDC hdc){
+    const int N = 11;//Number of our vertex
+    int edgeCeil = ceil(N / 4.0);//Number of vertex, that we can draw four time to get squer
+    int nx[N], ny[N];
+    char** nn = symbolArray(N);
+    arrayX(N, nx);
+    arrayY(N, ny);
+
+    int dx = 16, dy = 16, dtx = 5;
+
+    float** T = randm(N);
+    float** A = mulmr(0.66, T, N);//Fill our matrix
+    float** symA = makeSymmetric(A, N);
+
+    switch(option){
+        case 1:
+            drawGraph(hWnd, hdc, N, nx, ny, nn, A);
+            break;
+        case 2:
+            drawUnDependenceGraph(hWnd, hdc, N, nn, nx, ny, A);
+    }
 
     for(int i = 0; i < N; i++){
         free(T[i]);
@@ -395,28 +406,42 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam){
     PAINTSTRUCT ps;
     switch(messg){
         case WM_CREATE:
-            button = CreateWindow("BUTTON",
-                                  "This is a button!",
+            buttonDrawDirect = CreateWindow("BUTTON",
+                                  "Draw directed graph",
                                   WS_VISIBLE | WS_CHILD | WS_BORDER,
-                                  20, 20, 120, 20,
+                                  20, 20, 150, 20,
                                   hWnd, (HMENU) 1, NULL, NULL);
+            buttonDrawUnd = CreateWindow("BUTTON",
+                                  "Draw undirected graph",
+                                  WS_VISIBLE | WS_CHILD | WS_BORDER,
+                                  20, 40, 150, 20,
+                                  hWnd, (HMENU) 2, NULL, NULL);
             break;
         case WM_COMMAND:
 
             switch(LOWORD(wParam)){
                 case 1:
+                    InvalidateRect(hWnd, NULL, TRUE);
+                    UpdateWindow(hWnd);
+                    system("cls");
                     hdc = BeginPaint(hWnd, &ps);
-                    drawGraph(hWnd, hdc);
+                    HBRUSH hBrush = CreateSolidBrush(RGB(255, 255, 255)); // replace RGB(255, 255, 255) with your desired background color
+                    FillRect(hdc, &ps.rcPaint, hBrush);
+                    mainFunc(1, hWnd, hdc);
                     EndPaint(hWnd, &ps);
-                break;
+                    break;
+                case 2:
+                    InvalidateRect(hWnd, NULL, TRUE);
+                    UpdateWindow(hWnd);
+                    system("cls");
+                    hdc = BeginPaint(hWnd, &ps);
+                    FillRect(hdc, &ps.rcPaint, hBrush);
+                    mainFunc(2, hWnd, hdc);
+                    EndPaint(hWnd, &ps);
+                    break;
             }
             break;
         case WM_PAINT:
-            /*
-            hdc = BeginPaint(hWnd, &ps);
-            drawGraph(hWnd, hdc);
-            EndPaint(hWnd, &ps);
-            */
             break;
         case WM_DESTROY:
             PostQuitMessage(0);
