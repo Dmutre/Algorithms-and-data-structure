@@ -8,7 +8,7 @@
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 //Declare our buttons
-HWND buttonDrawDirect, buttonDrawUnd, buttonPower;
+HWND buttonDrawDirect, buttonDrawUnd, buttonPower, buttonRegCheck, buttonFindIsolated;
 
 char ProgName[] = "Лабораторна робота 4";
 
@@ -86,6 +86,29 @@ void printMatrix(int N, float** mat){
             printf("%.0f ", mat[i][j]);
         }
         printf("\n");
+    }
+}
+
+void printIntArray(int N, int* array){
+    for(int i = 0; i < N; i++){
+        printf("%d ", array[i]);
+    }
+    printf("\n");
+}
+
+int checkForRegularity(int N, int* array){
+    for(int i = 0; i < N; i++){
+        if(array[0] == array[i]) continue;
+        else return 0;
+    }
+    return 1;
+}
+
+void regularityPrint(int flag, int* array){
+    if(flag == 0){
+        printf("NO\n");
+    } else if(flag == 1){
+        printf("YES\nPower of regularity is: %d\n", array[1]);
     }
 }
 
@@ -391,6 +414,7 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
     int nx[N], ny[N];
     arrayX(N, nx);
     arrayY(N, ny);
+    int flag;
 
     char** nn = symbolArray(N);
     float** T = randm(N);
@@ -408,7 +432,28 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
             drawUnDependenceGraph(hWnd, hdc, N, nn, nx, ny, A);
             break;
         case 3:
-
+            printf("Directed graph: \n");
+            printMatrix(N, A);
+            printf("Half degree of incoming due to above matrix:\n");
+            printIntArray(N, incomingDeg);
+            printf("Half degree of outcoming due to above matrix:\n");
+            printIntArray(N, outgoingDeg);
+            printf("\n");
+            printf("Undirected graph:\n");
+            printMatrix(N, symA);
+            printf("Power of vertexes in undirected graph due to above matrix:\n");
+            printIntArray(N, undirPower);
+            break;
+        case 4:
+            printf("Is undirected graph is regular: ");
+            flag = checkForRegularity(N, undirPower);
+            regularityPrint(flag, undirPower);
+            printf("Is directed graph is regular for incoming: ");
+            flag = checkForRegularity(N, incomingDeg);
+            regularityPrint(flag, incomingDeg);
+            printf("Is directed graph is regular for outcoming: ");
+            flag = checkForRegularity(N, outgoingDeg);
+            regularityPrint(flag, outgoingDeg);
             break;
     }
 
@@ -416,7 +461,7 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
         free(T[i]);
         free(A[i]);
     }
-    free(T);//To avoid problems with dynamic memory we free out matrix in the end of our programme
+    free(T);//To avoid problems with dynamic memory we free out matrix in the end of our program
     free(A);
     free(nn);
     free(undirPower);
@@ -481,10 +526,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam){
                                   20, 50, 150, 30,
                                   hWnd, (HMENU) 2, NULL, NULL);
             buttonPower = CreateWindow("BUTTON",
-                                  "Power of graph",
+                                  "Power graph",
                                   WS_VISIBLE | WS_CHILD | WS_BORDER,
                                   20, 80, 150, 30,
                                   hWnd, (HMENU) 3, NULL, NULL);
+            buttonRegCheck = CreateWindow("BUTTON",
+                                  "Check for regular graph",
+                                  WS_VISIBLE | WS_CHILD | WS_BORDER,
+                                  20, 110, 180, 30,
+                                  hWnd, (HMENU) 4, NULL, NULL);
+            buttonFindIsolated = CreateWindow("BUTTON",
+                                  "Show isolated vertex",
+                                  WS_VISIBLE | WS_CHILD | WS_BORDER,
+                                  20, 130, 150, 30,
+                                  hWnd, (HMENU) 5, NULL, NULL);
             break;
         case WM_COMMAND:
 
@@ -497,6 +552,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam){
                     break;
                 case 3:
                     windowUpdate(hWnd, hdc, ps, 3);
+                    break;
+                case 4:
+                    windowUpdate(hWnd, hdc, ps, 4);
                     break;
             }
             break;
