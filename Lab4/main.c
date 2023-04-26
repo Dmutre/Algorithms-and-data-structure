@@ -10,7 +10,7 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 //Declare our buttons
 HWND buttonDrawDirect, buttonDrawUnd, buttonPower;
 
-char ProgName[] = "Лабораторна робота 3";
+char ProgName[] = "Лабораторна робота 4";
 
 void arrow(float fi, int px, int py, HDC hdc){
     int lx, ly, rx, ry;
@@ -77,9 +77,10 @@ float** makeSymmetric(float** mat, int n){
             }
         }
     }
+    return arr;
 }
 
-void printMatrix(float** mat, int N){
+void printMatrix(int N, float** mat){
     for(int i = 0; i < N; i++){
         for(int j = 0; j < N; j++){
             printf("%.0f ", mat[i][j]);
@@ -137,6 +138,16 @@ void drawUnDependenceGraph(HWND hWnd, HDC hdc, int n, char** nn, int nx[], int n
     int dx = 16, dy = 16, dtx = 5;
     HPEN KPen = CreatePen(PS_SOLID, 1, RGB(20, 20, 5));
     SelectObject(hdc, KPen);
+
+    printf("Undirected A matrix:\n");//Output our matrix of dependencies
+    for(int i = 0; i < n; i++){
+        for(int j = 0; j < n; j++){
+            if(A[j][i] == 1 || A[i][j] == 1){
+                printf("1 ");
+            } else printf("%.0f ", A[i][j]);
+        }
+        printf("\n");
+    }
 
     for(int i = 0; i < n; i++){//For ellipses
         for(int j = 0; j < n; j++){
@@ -205,6 +216,24 @@ void drawUnDependenceGraph(HWND hWnd, HDC hdc, int n, char** nn, int nx[], int n
 void drawGraph(HWND hWnd, HDC hdc, int N, int nx[], int ny[], char** nn, float** A){
     int edgeCeil = ceil(N / 4.0);//Number of vertex, that we can draw four time to get squer
     int dx = 16, dy = 16, dtx = 5;
+
+    printf("%\nX coordinates: ");
+    for(int i = 0; i < N; i++){//Output coordinates of vertexes for X
+        printf("%d ", nx[i]);
+    }
+    printf("%\nY coordinates");
+    for(int i = 0; i < N; i++){//Output coordinates of vertexes for Y
+        printf("%d ", ny[i]);
+    }
+    printf("\n");
+
+    printf("A:\n");//Output our matrix of dependencies
+    for(int i = 0; i < N; i++){
+        for(int j = 0; j < N; j++){
+            printf("%.0f ", A[i][j]);
+        }
+        printf("\n");
+    }
 
     for(int i = 0; i < N; i++){//For ellipses
         for(int j = 0; j < N; j++){
@@ -309,19 +338,67 @@ void drawGraph(HWND hWnd, HDC hdc, int N, int nx[], int ny[], char** nn, float**
     }
 }
 
+int* powerOfUndirGraph(int N, float** mat){
+    int* undirPower = malloc(N * sizeof(int));
+    int count;
+
+    for(int i = 0; i < N; i++){
+        count = 0;
+        for(int j = 0; j < N; j++){
+            if(mat[i][j] == 1.0) count++;
+        }
+        undirPower[i] = count;
+    }
+
+    return undirPower;
+}
+
+int* outgoingDegrees(int N, float** mat) {
+    int* outgoingDegrees = (int*) malloc(N * sizeof(int));
+    int count = 0;
+
+    for (int i = 0; i < N; i++) {
+            count = 0;
+        for (int j = 0; j < N; j++) {
+            if (mat[i][j] == 1) count++;
+        }
+        outgoingDegrees[i] = count;
+    }
+
+    return outgoingDegrees;
+}
+
+int* incomingDegrees(int N, float** mat) {
+    int* incomingDegrees = (int*) malloc(N * sizeof(int));
+
+    for (int i = 0; i < N; i++) {
+        incomingDegrees[i] = 0;
+    }
+
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
+            if (mat[i][j] == 1) {
+                incomingDegrees[j]++;
+            }
+        }
+    }
+
+    return incomingDegrees;
+}
+
 void mainFunc(int option, HWND hWnd, HDC hdc){
     const int N = 11;//Number of our vertex
-    int edgeCeil = ceil(N / 4.0);//Number of vertex, that we can draw four time to get squer
     int nx[N], ny[N];
-    char** nn = symbolArray(N);
     arrayX(N, nx);
     arrayY(N, ny);
 
-    int dx = 16, dy = 16, dtx = 5;
-
+    char** nn = symbolArray(N);
     float** T = randm(N);
     float** A = mulmr(0.66, T, N);//Fill our matrix
     float** symA = makeSymmetric(A, N);
+    int* undirPower = powerOfUndirGraph(N, symA);
+    int* outgoingDeg = outgoingDegrees(N, A);
+    int* incomingDeg = incomingDegrees(N, A);
 
     switch(option){
         case 1:
@@ -331,7 +408,7 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
             drawUnDependenceGraph(hWnd, hdc, N, nn, nx, ny, A);
             break;
         case 3:
-            printf("Hello 3th option\n");
+
             break;
     }
 
@@ -342,6 +419,9 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
     free(T);//To avoid problems with dynamic memory we free out matrix in the end of our programme
     free(A);
     free(nn);
+    free(undirPower);
+    free(outgoingDeg);
+    free(incomingDeg);
 }
 
 void windowUpdate(HWND hWnd, HDC hdc, PAINTSTRUCT ps, int option){
