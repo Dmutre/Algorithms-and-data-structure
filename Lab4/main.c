@@ -12,7 +12,7 @@ HWND buttonDrawDirect, buttonDrawUnd, buttonPower, buttonRegCheck, buttonFindIso
 
 char ProgName[] = "Лабораторна робота 4";
 
-void arrow(float fi, int px, int py, HDC hdc){
+void arrow(float fi, int px, int py, HDC hdc){//draw arrow
     int lx, ly, rx, ry;
     lx = px - 15 * cos(fi + 0.3);
     rx = px - 15 * cos(fi - 0.3);
@@ -24,19 +24,19 @@ void arrow(float fi, int px, int py, HDC hdc){
     LineTo(hdc, rx, ry);
 }
 
-void drawArrow(int fromx, int fromy, int tox, int toy, int r, HDC hdc){
+void drawArrow(int fromx, int fromy, int tox, int toy, int r, HDC hdc){//count angle and call function for drawing arrow
     float angleRad = atan2((toy-fromy), (tox-fromx));
     float px = tox - r*cos(angleRad);
     float py = toy - r*sin(angleRad);
     arrow(angleRad, px, py, hdc);
 }
 
-float** randm(int n) {
+float** randm(int N) {//generate random matrix with value from 0 to 2.0
     srand(2113);
-    float** arr = (float**)malloc(n * sizeof(float*));
-    for(int i = 0; i < n; i++){
-        arr[i] = (float*)malloc(n * sizeof(float));
-        for(int j = 0; j < n; j++){
+    float** arr = (float**)malloc(N * sizeof(float*));
+    for(int i = 0; i < N; i++){
+        arr[i] = (float*)malloc(N * sizeof(float));
+        for(int j = 0; j < N; j++){
             arr[i][j] = ((float)rand() / (float)RAND_MAX) * 2.0;
         }
     }
@@ -44,7 +44,7 @@ float** randm(int n) {
     return arr;
 }
 
-float** mulmr(float c, float** mat, int n) {
+float** mulmr(float c, float** mat, int n) {//round matrix from randm() to 0 1 matrix
     float** res = (float**)malloc(n * sizeof(float*));
     for(int i = 0; i < n; i++){
         res[i] = (float*)malloc(n * sizeof(float));
@@ -56,7 +56,7 @@ float** mulmr(float c, float** mat, int n) {
     return res;
 }
 
-char** symbolArray(int N){
+char** symbolArray(int N){//return symbol char array of pointer with elements from 1 to N
     char** array = malloc(N * sizeof(char*));
     for(int i = 0; i < N; i++) {
         array[i] = malloc(3 * sizeof(char)); // allocate memory for each element
@@ -65,11 +65,11 @@ char** symbolArray(int N){
     return array;
 }
 
-float** makeSymmetric(float** mat, int n){
-    float** arr = (float**)malloc(n * sizeof(float*));
-    for(int i = 0; i < n; i++){
-        arr[i] = (float*)malloc(n * sizeof(float));
-        for(int j = 0; j < n; j++){
+float** makeSymmetric(float** mat, int N){//receive 0 1 matrix A and make it symmetric for 1 (undirected graph)
+    float** arr = (float**)malloc(N * sizeof(float*));
+    for(int i = 0; i < N; i++){
+        arr[i] = (float*)malloc(N * sizeof(float));
+        for(int j = 0; j < N; j++){
             if(mat[i][j] == 1 || mat[j][i] == 1){
                 arr[i][j] = 1;
             } else {
@@ -80,7 +80,7 @@ float** makeSymmetric(float** mat, int n){
     return arr;
 }
 
-void printMatrix(int N, float** mat){
+void printMatrix(int N, float** mat){//Print received matrix
     for(int i = 0; i < N; i++){
         for(int j = 0; j < N; j++){
             printf("%.0f ", mat[i][j]);
@@ -89,14 +89,14 @@ void printMatrix(int N, float** mat){
     }
 }
 
-void printIntArray(int N, int* array){
+void printIntArray(int N, int* array){//Print received int array
     for(int i = 0; i < N; i++){
         printf("%d ", array[i]);
     }
     printf("\n");
 }
 
-int checkForRegularity(int N, int* array){
+int checkForRegularity(int N, int* array){//return 1(true) or 0(false) value about received array of vertex power. If graph is regular- return 1
     for(int i = 0; i < N; i++){
         if(array[0] == array[i]) continue;
         else return 0;
@@ -104,6 +104,7 @@ int checkForRegularity(int N, int* array){
     return 1;
 }
 
+//depend on received flag from checkForRegularity() printf information about regularity of graph in console. Also printf power of graph
 void regularityPrint(int flag, int* array){
     if(flag == 0){
         printf("NO\n");
@@ -112,10 +113,10 @@ void regularityPrint(int flag, int* array){
     }
 }
 
-void arrayX(int N, int* array){
+void arrayX(int N, int* array){//count X coordinates for graph
     float edge = N / 4.0;
     int edgeCeil = ceil(edge);
-    int stepRigth = 200;
+    int stepRigth = 200;//step to go away from left border of window, to let space for buttons
 
     for(int i = 0; i < edgeCeil+1; i++){
         array[i] = 100 + 100*i + stepRigth;
@@ -134,7 +135,7 @@ void arrayX(int N, int* array){
     }
 }
 
-void arrayY(int N, int* array){
+void arrayY(int N, int* array){//count Y coordinates for graph
     float edge = N / 4.0;
     int edgeCeil = ceil(edge);
 
@@ -155,7 +156,7 @@ void arrayY(int N, int* array){
     }
 }
 
-
+//from received matrix of dependencies, coordinates, names and number of vertex draw undirected graph
 void drawUnDependenceGraph(HWND hWnd, HDC hdc, int n, char** nn, int nx[], int ny[], float** A){
     int edgeCeil = ceil(n / 4.0);//Number of vertex, that we can draw four time to get squer
     int dx = 16, dy = 16, dtx = 5;
@@ -236,6 +237,7 @@ void drawUnDependenceGraph(HWND hWnd, HDC hdc, int n, char** nn, int nx[], int n
     }
 }
 
+//from received matrix of dependencies, coordinates, names and number of vertex draw directed graph
 void drawGraph(HWND hWnd, HDC hdc, int N, int nx[], int ny[], char** nn, float** A){
     int edgeCeil = ceil(N / 4.0);//Number of vertex, that we can draw four time to get squer
     int dx = 16, dy = 16, dtx = 5;
@@ -361,7 +363,7 @@ void drawGraph(HWND hWnd, HDC hdc, int N, int nx[], int ny[], char** nn, float**
     }
 }
 
-int* powerOfUndirGraph(int N, float** mat){
+int* powerOfUndirGraph(int N, float** mat){//return array of powers of undirected graph vertexes
     int* undirPower = malloc(N * sizeof(int));
     int count;
 
@@ -376,7 +378,7 @@ int* powerOfUndirGraph(int N, float** mat){
     return undirPower;
 }
 
-int* outgoingDegrees(int N, float** mat) {
+int* outgoingDegrees(int N, float** mat) {//return array of half power of outgoing to vertex dependencies
     int* outgoingDegrees = (int*) malloc(N * sizeof(int));
     int count = 0;
 
@@ -391,7 +393,7 @@ int* outgoingDegrees(int N, float** mat) {
     return outgoingDegrees;
 }
 
-int* incomingDegrees(int N, float** mat) {
+int* incomingDegrees(int N, float** mat) {//return array of half power of incoming to vertex dependencies
     int* incomingDegrees = (int*) malloc(N * sizeof(int));
 
     for (int i = 0; i < N; i++) {
@@ -409,6 +411,7 @@ int* incomingDegrees(int N, float** mat) {
     return incomingDegrees;
 }
 
+//main function from which we call all needed function onclick of buttons. Also this function response all of calculations and let hem in argument of functions
 void mainFunc(int option, HWND hWnd, HDC hdc){
     const int N = 11;//Number of our vertex
     int nx[N], ny[N];
@@ -434,14 +437,14 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
         case 3:
             printf("Directed graph: \n");
             printMatrix(N, A);
-            printf("Half degree of incoming due to above matrix:\n");
+            printf("Half degree of incoming according to above matrix:\n");
             printIntArray(N, incomingDeg);
-            printf("Half degree of outcoming due to above matrix:\n");
+            printf("Half degree of outcoming according to above matrix:\n");
             printIntArray(N, outgoingDeg);
             printf("\n");
             printf("Undirected graph:\n");
             printMatrix(N, symA);
-            printf("Power of vertexes in undirected graph due to above matrix:\n");
+            printf("Power of vertexes in undirected graph according to above matrix:\n");
             printIntArray(N, undirPower);
             break;
         case 4:
@@ -454,6 +457,8 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
             printf("Is directed graph is regular for outcoming: ");
             flag = checkForRegularity(N, outgoingDeg);
             regularityPrint(flag, outgoingDeg);
+            break;
+        case 5:
             break;
     }
 
@@ -469,6 +474,7 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
     free(incomingDeg);
 }
 
+//function that refresh console and our app window from previous action. Also after cleaning call mainFunc() with options
 void windowUpdate(HWND hWnd, HDC hdc, PAINTSTRUCT ps, int option){
     InvalidateRect(hWnd, NULL, TRUE);
     HBRUSH hBrush = CreateSolidBrush(RGB(255, 255, 255)); // replace RGB(255, 255, 255) with desired background color
@@ -538,7 +544,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam){
             buttonFindIsolated = CreateWindow("BUTTON",
                                   "Show isolated vertex",
                                   WS_VISIBLE | WS_CHILD | WS_BORDER,
-                                  20, 130, 150, 30,
+                                  20, 140, 150, 30,
                                   hWnd, (HMENU) 5, NULL, NULL);
             break;
         case WM_COMMAND:
@@ -555,6 +561,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam){
                     break;
                 case 4:
                     windowUpdate(hWnd, hdc, ps, 4);
+                    break;
+                case 5:
+                    windowUpdate(hWnd, hdc, ps, 5);
                     break;
             }
             break;
