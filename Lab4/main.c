@@ -116,7 +116,7 @@ void regularityPrint(int flag, int* array){
 void arrayX(int N, int* array){//count X coordinates for graph
     float edge = N / 4.0;
     int edgeCeil = ceil(edge);
-    int stepRigth = 200;//step to go away from left border of window, to let space for buttons
+    int stepRigth = 400;//step to go away from left border of window, to let space for buttons
 
     for(int i = 0; i < edgeCeil+1; i++){
         array[i] = 100 + 100*i + stepRigth;
@@ -199,7 +199,6 @@ void drawUnDependenceGraph(HWND hWnd, HDC hdc, int n, char** nn, int nx[], int n
     for(int i = 0; i < n; i++){//For lines when circles are on the same row in X or Y
         for(int j = 0; j < n; j++){
             if(A[i][j] == 1 && abs(i-j) >=2 && abs(i-j) <= edgeCeil && (nx[i] == nx[j] || ny[i] == ny[j])){
-                int dir = (int) ceil((i+1)/(float) edgeCeil);
                 if(nx[i] == nx[j]){
                     MoveToEx(hdc, nx[i], ny[i], NULL);
                     LineTo(hdc, nx[j]+35, ny[i]-(ny[i]-ny[j])/2);
@@ -411,9 +410,42 @@ int* incomingDegrees(int N, float** mat) {//return array of half power of incomi
     return incomingDegrees;
 }
 
+int* UndirIsolatedPendant(int N, int* array){//Function, that receive array of graph`s vertexes power and return array with mark which vertex is it
+    int* UndirIsPen = (int*) malloc(N * sizeof(int));
+
+    //if vertex is isolated, their number in array would be 0, if has only one dependencies (leaf vertex)- 1, more- 2
+    for(int i = 0; i < N; i++){
+        if(array[i] == 0){
+            UndirIsPen[i] = 0;
+        } else if(array[i] == 1){
+            UndirIsPen[i] = 1;
+        } else UndirIsPen[i] = 2;
+    }
+
+    return UndirIsPen;
+}
+
+void printIsolatedPendant(int N, int* array){//Function that output numbers of isolated and pendant vertexes
+    int isolatedNum = 0;
+    int pendantNum = 0;
+
+    printf("\nIsolated vertexes:\n");
+    for(int i = 0; i < N; i++){
+        if(array[i] == 0){
+            printf("%d  ", (i+1));
+        }
+    }
+    printf("\n\nPendant vertexes:\n");
+    for(int i = 0; i < N; i++){
+        if(array[i] == 1){
+            printf("%d  ", (i+1));
+        }
+    }
+}
+
 //main function from which we call all needed function onclick of buttons. Also this function response all of calculations and let hem in argument of functions
 void mainFunc(int option, HWND hWnd, HDC hdc){
-    const int N = 11;//Number of our vertex
+    const int N = 16;//Number of our vertex
     int nx[N], ny[N];
     arrayX(N, nx);
     arrayY(N, ny);
@@ -421,11 +453,12 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
 
     char** nn = symbolArray(N);
     float** T = randm(N);
-    float** A = mulmr(0.66, T, N);//Fill our matrix
+    float** A = mulmr(0.55, T, N);//Fill our matrix
     float** symA = makeSymmetric(A, N);
     int* undirPower = powerOfUndirGraph(N, symA);
     int* outgoingDeg = outgoingDegrees(N, A);
     int* incomingDeg = incomingDegrees(N, A);
+    int* IsolatedPendant = UndirIsolatedPendant(N, undirPower);
 
     switch(option){
         case 1:
@@ -459,6 +492,8 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
             regularityPrint(flag, outgoingDeg);
             break;
         case 5:
+            drawUnDependenceGraph(hWnd, hdc, N, nn, nx, ny, A);
+            printIsolatedPendant(N, IsolatedPendant);
             break;
     }
 
@@ -472,6 +507,7 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
     free(undirPower);
     free(outgoingDeg);
     free(incomingDeg);
+    free(IsolatedPendant);
 }
 
 //function that refresh console and our app window from previous action. Also after cleaning call mainFunc() with options
@@ -542,9 +578,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam){
                                   20, 110, 180, 30,
                                   hWnd, (HMENU) 4, NULL, NULL);
             buttonFindIsolated = CreateWindow("BUTTON",
-                                  "Show isolated vertex",
+                                  "Show isolated and pendant",
                                   WS_VISIBLE | WS_CHILD | WS_BORDER,
-                                  20, 140, 150, 30,
+                                  20, 140, 200, 30,
                                   hWnd, (HMENU) 5, NULL, NULL);
             break;
         case WM_COMMAND:
