@@ -151,7 +151,6 @@ void drawUnDependenceGraph(HWND hWnd, HDC hdc, int n, char** nn, int nx[], int n
     for(int i = 0; i < n; i++){//For lines when circles are on the same row in X or Y
         for(int j = 0; j < n; j++){
             if(A[i][j] == 1 && abs(i-j) >=2 && abs(i-j) <= edgeCeil && (nx[i] == nx[j] || ny[i] == ny[j])){
-                int dir = (int) ceil((i+1)/(float) edgeCeil);
                 if(nx[i] == nx[j]){
                     MoveToEx(hdc, nx[i], ny[i], NULL);
                     LineTo(hdc, nx[j]+35, ny[i]-(ny[i]-ny[j])/2);
