@@ -362,6 +362,25 @@ void drawGraph(HWND hWnd, HDC hdc, int N, int nx[], int ny[], char** nn, float**
     }
 }
 
+//function to circle isolated and pendant vertexes by red and yellow color accordingly
+void drawIsolatedPendantVertexes(HWND hWnd, HDC hdc, int N, int nx[], int ny[], char** nn, int* isPen){
+    HPEN redPen = CreatePen(PS_SOLID, 2, RGB(255, 0, 0));
+    HPEN yellowPen = CreatePen(PS_SOLID, 2, RGB(255, 255, 0));
+    int dx = 16, dy = 16, dtx = 5;
+
+    for(int i = 0; i < N; i++){
+        if(isPen[i] == 0){
+            SelectObject(hdc, redPen);
+            Ellipse(hdc, nx[i]-dx,ny[i]-dy,nx[i]+dx,ny[i]+dy);
+            TextOut(hdc, nx[i]-dtx,ny[i]-dy/2, nn[i],2);
+        } else if(isPen[i] == 1){
+            SelectObject(hdc, yellowPen);
+            Ellipse(hdc, nx[i]-dx,ny[i]-dy,nx[i]+dx,ny[i]+dy);
+            TextOut(hdc, nx[i]-dtx,ny[i]-dy/2, nn[i],2);
+        }
+    }
+}
+
 int* powerOfUndirGraph(int N, float** mat){//return array of powers of undirected graph vertexes
     int* undirPower = malloc(N * sizeof(int));
     int count;
@@ -445,7 +464,7 @@ void printIsolatedPendant(int N, int* array){//Function that output numbers of i
 
 //main function from which we call all needed function onclick of buttons. Also this function response all of calculations and let hem in argument of functions
 void mainFunc(int option, HWND hWnd, HDC hdc){
-    const int N = 16;//Number of our vertex
+    const int N = 11;//Number of our vertex
     int nx[N], ny[N];
     arrayX(N, nx);
     arrayY(N, ny);
@@ -453,7 +472,7 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
 
     char** nn = symbolArray(N);
     float** T = randm(N);
-    float** A = mulmr(0.55, T, N);//Fill our matrix
+    float** A = mulmr(0.66, T, N);//Fill our matrix
     float** symA = makeSymmetric(A, N);
     int* undirPower = powerOfUndirGraph(N, symA);
     int* outgoingDeg = outgoingDegrees(N, A);
@@ -493,6 +512,7 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
             break;
         case 5:
             drawUnDependenceGraph(hWnd, hdc, N, nn, nx, ny, A);
+            drawIsolatedPendantVertexes(hWnd, hdc, N, nx, ny, nn, IsolatedPendant);
             printIsolatedPendant(N, IsolatedPendant);
             break;
     }
