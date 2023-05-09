@@ -9,7 +9,7 @@
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 //Declare our buttons
-HWND buttonDrawDirect, buttonDrawUnd, buttonPower, buttonRegCheck, buttonFindIsolated;
+HWND buttonDrawDirect, buttonDrawUnd, buttonPower, buttonRegCheck, buttonFindIsolated, buttonDraw2;
 
 char ProgName[] = "Лабораторна робота 4";
 
@@ -250,7 +250,7 @@ void drawGraph(HWND hWnd, HDC hdc, int N, int nx[], int ny[], char** nn, float**
     }
     printf("\n");
 
-    printf("A:\n");//Output our matrix of dependencies
+    printf("Adjacency matrix:\n");//Output our matrix of dependencies
     for(int i = 0; i < N; i++){
         for(int j = 0; j < N; j++){
             printf("%.0f ", A[i][j]);
@@ -467,7 +467,9 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
     char** nn = symbolArray(N);
     float** T = randm(N);
     float** A = mulmr(0.66, T, N);//Fill our matrix
+    float** A2 = mulmr(0.71, T, N);
     float** symA = makeSymmetric(A, N);
+    float** symA2 = makeSymmetric(A2, N);
     int* undirPower = powerOfUndirGraph(N, symA);
     int* outgoingDeg = outgoingDegrees(N, A);
     int* incomingDeg = incomingDegrees(N, A);
@@ -509,6 +511,8 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
             drawIsolatedPendantVertexes(hWnd, hdc, N, nx, ny, nn, IsolatedPendant);
             printIsolatedPendant(N, IsolatedPendant);
             break;
+        case 6:
+            drawGraph(hWnd, hdc, N, nx, ny, nn, A2);
         default:
             break;
     }
@@ -516,9 +520,15 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
     for(int i = 0; i < N; i++){
         free(T[i]);
         free(A[i]);
+        free(A2[i]);
+        free(symA[i]);
+        free(symA2[i]);
     }
     free(T);//To avoid problems with dynamic memory we free out matrix in the end of our program
     free(A);
+    free(A2);
+    free(symA);
+    free(symA2);
     free(nn);
     free(undirPower);
     free(outgoingDeg);
@@ -598,6 +608,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam){
                                   WS_VISIBLE | WS_CHILD | WS_BORDER,
                                   20, 140, 200, 30,
                                   hWnd, (HMENU) 5, NULL, NULL);
+            buttonDraw2 = CreateWindow("BUTTON",
+                                  "Draw A2 and show power",
+                                  WS_VISIBLE | WS_CHILD | WS_BORDER,
+                                  20, 170, 200, 30,
+                                  hWnd, (HMENU) 6, NULL, NULL);
             break;
         case WM_COMMAND:
 
@@ -617,6 +632,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam){
                 case 5:
                     windowUpdate(hWnd, hdc, ps, 5);
                     break;
+                case 6:
+                    windowUpdate(hWnd, hdc, ps, 6);
             }
             break;
         case WM_PAINT:
