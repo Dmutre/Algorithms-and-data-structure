@@ -3,6 +3,7 @@
 #include <windows.h>
 #include <math.h>
 #include<conio.h>
+#define RADIUS 35
 
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -198,16 +199,16 @@ void drawUnDependenceGraph(HWND hWnd, HDC hdc, int n, char** nn, int nx[], int n
 
     for(int i = 0; i < n; i++){//For lines when circles are on the same row in X or Y
         for(int j = 0; j < n; j++){
-            if(A[i][j] == 1 && abs(i-j) >=2 && abs(i-j) <= edgeCeil && (nx[i] == nx[j] || ny[i] == ny[j])){
+            if(A[i][j] == 1 && ((abs(i-j) >=2 && abs(i-j) <= edgeCeil) || abs(i-j) >= 3*edgeCeil) && (nx[i] == nx[j] || ny[i] == ny[j])){
                 if(nx[i] == nx[j]){
                     MoveToEx(hdc, nx[i], ny[i], NULL);
-                    LineTo(hdc, nx[j]+35, ny[i]-(ny[i]-ny[j])/2);
-                    MoveToEx(hdc, nx[j]+35, ny[i]-(ny[i]-ny[j])/2, NULL);
+                    LineTo(hdc, nx[j]+RADIUS, ny[i]-(ny[i]-ny[j])/2);
+                    MoveToEx(hdc, nx[j]+RADIUS, ny[i]-(ny[i]-ny[j])/2, NULL);
                     LineTo(hdc, nx[j], ny[j]);
                 } else{
                     MoveToEx(hdc, nx[i], ny[i], NULL);
-                    LineTo(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-35);
-                    MoveToEx(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-35, NULL);
+                    LineTo(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-RADIUS);
+                    MoveToEx(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-RADIUS, NULL);
                     LineTo(hdc, nx[j], ny[j]);
                 }
             }
@@ -217,9 +218,7 @@ void drawUnDependenceGraph(HWND hWnd, HDC hdc, int n, char** nn, int nx[], int n
     for(int i = 0; i < n; i++){//For lines between vertex
         for(int j = 0; j < n; j++){
             if(A[i][j] == 1){
-                if(abs(i-j) >=2 && abs(i-j) <= edgeCeil && (nx[i] == nx[j] || ny[i] == ny[j])){
-                } else if(i == j){
-                } else{
+                if(!(((abs(i-j) >=2 && abs(i-j) <= edgeCeil) || abs(i-j) >= 3*edgeCeil) && (nx[i] == nx[j] || ny[i] == ny[j])) && i != j){
                     MoveToEx(hdc, nx[i], ny[i], NULL);
                     LineTo(hdc, nx[j], ny[j]);
                 }
@@ -267,10 +266,10 @@ void drawGraph(HWND hWnd, HDC hdc, int N, int nx[], int ny[], char** nn, float**
                     if(dir%2 == 0){
                         if(dir > edgeCeil){
                             Ellipse(hdc, nx[i]-40, ny[i]-20, nx[i], ny[i]+20);
-                            drawArrow(nx[i]-35, ny[i]+50, nx[j], ny[j], dx, hdc);
+                            drawArrow(nx[i]-RADIUS, ny[i]+50, nx[j], ny[j], dx, hdc);
                         } else{
                             Ellipse(hdc, nx[i]+40, ny[i]-20, nx[i], ny[i]+20);
-                            drawArrow(nx[i]+35, ny[i]-50, nx[j], ny[j], dx, hdc);
+                            drawArrow(nx[i]+RADIUS, ny[i]-50, nx[j], ny[j], dx, hdc);
                         }
                     } else{
                         if(dir >= edgeCeil){
@@ -288,35 +287,35 @@ void drawGraph(HWND hWnd, HDC hdc, int N, int nx[], int ny[], char** nn, float**
 
     for(int i = 0; i < N; i++){//For lines when circles are on the same row in X or Y
         for(int j = 0; j < N; j++){
-            if(A[i][j] == 1 && abs(i-j) >=2 && abs(i-j) <= edgeCeil && (nx[i] == nx[j] || ny[i] == ny[j])){
+            if(A[i][j] == 1 && ((abs(i-j) >=2 && abs(i-j) <= edgeCeil) || abs(i-j) >= 3*edgeCeil) && (nx[i] == nx[j] || ny[i] == ny[j])){
                 if(nx[i] == nx[j]){
                     if(i > j){
                         MoveToEx(hdc, nx[i], ny[i], NULL);
-                        LineTo(hdc, nx[j]+35, ny[i]-(ny[i]-ny[j])/2);
-                        MoveToEx(hdc, nx[j]+35, ny[i]-(ny[i]-ny[j])/2, NULL);
+                        LineTo(hdc, nx[j]+RADIUS, ny[i]-(ny[i]-ny[j])/2);
+                        MoveToEx(hdc, nx[j]+RADIUS, ny[i]-(ny[i]-ny[j])/2, NULL);
                         LineTo(hdc, nx[j], ny[j]);
-                        drawArrow(nx[j]+35, ny[i]-(ny[i]-ny[j])/2, nx[j], ny[j], dx, hdc);
+                        drawArrow(nx[j]+RADIUS, ny[i]-(ny[i]-ny[j])/2, nx[j], ny[j], dx, hdc);
                     } else{
                         MoveToEx(hdc, nx[i], ny[i], NULL);
-                        LineTo(hdc, nx[j]-35, ny[i]-(ny[i]-ny[j])/2);
-                        MoveToEx(hdc, nx[j]-35, ny[i]-(ny[i]-ny[j])/2, NULL);
+                        LineTo(hdc, nx[j]-RADIUS, ny[i]-(ny[i]-ny[j])/2);
+                        MoveToEx(hdc, nx[j]-RADIUS, ny[i]-(ny[i]-ny[j])/2, NULL);
                         LineTo(hdc, nx[j], ny[j]);
-                        drawArrow(nx[j]-35, ny[i]-(ny[i]-ny[j])/2, nx[j], ny[j], dx, hdc);
+                        drawArrow(nx[j]-RADIUS, ny[i]-(ny[i]-ny[j])/2, nx[j], ny[j], dx, hdc);
                     }
                 } else{
                     if(i > j){
                         MoveToEx(hdc, nx[i], ny[i], NULL);
-                        LineTo(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]+35);
-                        MoveToEx(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]+35, NULL);
+                        LineTo(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]+RADIUS);
+                        MoveToEx(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]+RADIUS, NULL);
                         LineTo(hdc, nx[j], ny[j]);
-                        drawArrow(nx[j]+(nx[i]-nx[j])/2, ny[i]+35, nx[j], ny[j], dx, hdc);
+                        drawArrow(nx[j]+(nx[i]-nx[j])/2, ny[i]+RADIUS, nx[j], ny[j], dx, hdc);
 
                     } else{
                         MoveToEx(hdc, nx[i], ny[i], NULL);
-                        LineTo(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-35);
-                        MoveToEx(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-35, NULL);
+                        LineTo(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-RADIUS);
+                        MoveToEx(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-RADIUS, NULL);
                         LineTo(hdc, nx[j], ny[j]);
-                        drawArrow(nx[j]+(nx[i]-nx[j])/2, ny[i]-35, nx[j], ny[j], dx, hdc);
+                        drawArrow(nx[j]+(nx[i]-nx[j])/2, ny[i]-RADIUS, nx[j], ny[j], dx, hdc);
                     }
                 }
             }
@@ -327,19 +326,14 @@ void drawGraph(HWND hWnd, HDC hdc, int N, int nx[], int ny[], char** nn, float**
     for(int i = 0; i < N; i++){//For lines between vertex
         for(int j = 0; j < N; j++){
             if(A[i][j] == 1){
-                if(abs(i-j) >=2 && abs(i-j) <= edgeCeil && (nx[i] == nx[j] || ny[i] == ny[j])){
-                    atall++;
-                } else if(i == j){
-                    atall++;
-                } else{
-                    atall++;
+                atall++;
+                if(!(((abs(i-j) >=2 && abs(i-j) <= edgeCeil) || abs(i-j) >= 3*edgeCeil) && (nx[i] == nx[j] || ny[i] == ny[j])) && i != j){
                     if(i > j && A[j][i] == 1){
                         MoveToEx(hdc, nx[i], ny[i], NULL);
                         LineTo(hdc, (nx[i]+nx[j])/2+20, (ny[i]+ny[j])/2);
                         MoveToEx(hdc, (nx[i]+nx[j])/2+20, (ny[i]+ny[j])/2, NULL);
                         LineTo(hdc, nx[j], ny[j]);
                         drawArrow((nx[i]+nx[j])/2+20, (ny[i]+ny[j])/2, nx[j], ny[j], dx, hdc);
-
                     } else{
                         MoveToEx(hdc, nx[i], ny[i], NULL);
                         LineTo(hdc, nx[j], ny[j]);
@@ -515,6 +509,8 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
             drawIsolatedPendantVertexes(hWnd, hdc, N, nx, ny, nn, IsolatedPendant);
             printIsolatedPendant(N, IsolatedPendant);
             break;
+        default:
+            break;
     }
 
     for(int i = 0; i < N; i++){
@@ -631,5 +627,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam){
         default:
             return DefWindowProc(hWnd, messg, wParam, lParam);
     }
+
     return 0;
 }
