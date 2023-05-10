@@ -585,6 +585,8 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
         free(A[i]);
         free(A2[i]);
         free(symA[i]);
+        free(A2Power2[i]);
+        free(A2Power3[i]);
         free(symA2[i]);
     }
     free(T);//To avoid problems with dynamic memory we free out matrix in the end of our program
@@ -592,6 +594,8 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
     free(A2);
     free(symA);
     free(symA2);
+    free(A2Power2);
+    free(A2Power3);
     free(nn);
     free(undirPower);
     free(outgoingDeg);
@@ -709,6 +713,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam){
             }
             break;
         case WM_PAINT:
+            UpdateWindow(hWnd);
             break;
         case WM_DESTROY:
             PostQuitMessage(0);
