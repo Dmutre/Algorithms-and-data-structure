@@ -9,7 +9,7 @@
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 //Declare our buttons
-HWND buttonDrawDirect, buttonDrawUnd, buttonPower, buttonRegCheck, buttonFindIsolated, buttonDraw2;
+HWND buttonDrawDirect, buttonDrawUnd, buttonPower, buttonRegCheck, buttonFindIsolated, buttonDraw2, buttonWays;
 
 char ProgName[] = "Лабораторна робота 4";
 
@@ -240,16 +240,6 @@ void drawGraph(HWND hWnd, HDC hdc, int N, int nx[], int ny[], char** nn, float**
     int edgeCeil = ceil(N / 4.0);//Number of vertex, that we can draw four time to get squer
     int dx = 16, dy = 16, dtx = 5;
 
-    printf("%\nX coordinates: ");
-    for(int i = 0; i < N; i++){//Output coordinates of vertexes for X
-        printf("%d ", nx[i]);
-    }
-    printf("%\nY coordinates");
-    for(int i = 0; i < N; i++){//Output coordinates of vertexes for Y
-        printf("%d ", ny[i]);
-    }
-    printf("\n");
-
     printf("Adjacency matrix:\n");//Output our matrix of dependencies
     for(int i = 0; i < N; i++){
         for(int j = 0; j < N; j++){
@@ -456,6 +446,53 @@ void printIsolatedPendant(int N, int* array){//Function that output numbers of i
     }
 }
 
+float** multiplyMatrices(float** mat1, float** mat2, int N) {
+    float** result = (float**)malloc(N * sizeof(float*));
+    int i, j, k;
+
+    for (i = 0; i < N; i++) {
+        result[i] = (float*)malloc(N * sizeof(float));
+        for (j = 0; j < N; j++) {
+            result[i][j] = 0;
+            for (k = 0; k < N; k++) {
+                result[i][j] += mat1[i][k] * mat2[k][j];
+            }
+        }
+    }
+
+    return result;
+}
+
+float** powerMatrix(float** matrix, int N, int power) {
+    int i;
+    float** result = (float**)malloc(N * sizeof(float*));
+
+    for (i = 0; i < N; i++) {
+        result[i] = (float*)malloc(N * sizeof(float));
+        for (int j = 0; j < N; j++) {
+            result[i][j] = matrix[i][j];
+        }
+    }
+
+    for (i = 1; i < power; i++) {
+        float** temp = multiplyMatrices(result, matrix, N);
+        for (int j = 0; j < N; j++) {
+            free(result[j]);
+        }
+        free(result);
+        result = temp;
+    }
+
+    return result;
+}
+
+void makeBinaryMatrix(float** mat, int N){
+    for(int i = 0; i < N; i++){
+        for(int j = 0; j < N; j++){
+            if(mat[i][j] >= 1) mat[i][j] = 1;
+        }
+    }
+}
 //main function from which we call all needed function onclick of buttons. Also this function response all of calculations and let hem in argument of functions
 void mainFunc(int option, HWND hWnd, HDC hdc){
     const int N = 11;//Number of our vertex
@@ -468,6 +505,8 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
     float** T = randm(N);
     float** A = mulmr(0.66, T, N);//Fill our matrix
     float** A2 = mulmr(0.71, T, N);
+    float** A2Power2 = powerMatrix(A2, N, 2);
+    float** A2Power3 = powerMatrix(A2, N, 3);
     float** symA = makeSymmetric(A, N);
     float** symA2 = makeSymmetric(A2, N);
     int* undirPower = powerOfUndirGraph(N, symA);
@@ -513,6 +552,30 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
             break;
         case 6:
             drawGraph(hWnd, hdc, N, nx, ny, nn, A2);
+            free(undirPower);
+            free(outgoingDeg);
+            free(incomingDeg);
+            undirPower = powerOfUndirGraph(N, symA2);
+            outgoingDeg = outgoingDegrees(N, A2);
+            incomingDeg = incomingDegrees(N, A2);
+            printf("Half degree of incoming according to above matrix:\n");
+            printIntArray(N, incomingDeg);
+            printf("Half degree of outcoming according to above matrix:\n");
+            printIntArray(N, outgoingDeg);
+            printf("\n");
+            printf("Undirected graph:\n");
+            printMatrix(N, symA2);
+            printf("Power of vertexes in undirected graph according to above matrix:\n");
+            printIntArray(N, undirPower);
+            break;
+        case 7:
+            printMatrix(N, A2);
+            printf("\n");
+            printMatrix(N, A2Power2);
+            printf("\n");
+            makeBinaryMatrix(A2Power2, N);
+            printMatrix(N, A2Power2);
+            break;
         default:
             break;
     }
@@ -613,6 +676,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam){
                                   WS_VISIBLE | WS_CHILD | WS_BORDER,
                                   20, 170, 200, 30,
                                   hWnd, (HMENU) 6, NULL, NULL);
+            buttonWays = CreateWindow("BUTTON",
+                                  "Show all 2 and 3 steps ways",
+                                  WS_VISIBLE | WS_CHILD | WS_BORDER,
+                                  20, 200, 200, 30,
+                                  hWnd, (HMENU) 7, NULL, NULL);
             break;
         case WM_COMMAND:
 
@@ -634,6 +702,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam){
                     break;
                 case 6:
                     windowUpdate(hWnd, hdc, ps, 6);
+                    break;
+                case 7:
+                    windowUpdate(hWnd, hdc, ps, 7);
+                    break;
             }
             break;
         case WM_PAINT:
