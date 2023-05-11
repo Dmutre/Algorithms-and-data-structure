@@ -3,13 +3,14 @@
 #include <windows.h>
 #include <math.h>
 #include<conio.h>
+#include <stdbool.h>
 #define RADIUS 35
 
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 //Declare our buttons
-HWND buttonDrawDirect, buttonDrawUnd, buttonPower, buttonRegCheck, buttonFindIsolated, buttonDraw2, buttonWays;
+HWND buttonDrawDirect, buttonDrawUnd, buttonPower, buttonRegCheck, buttonFindIsolated, buttonDraw2, buttonWays, buttonReachable;
 
 char ProgName[] = "Лабораторна робота 4";
 
@@ -85,6 +86,15 @@ void printMatrix(int N, float** mat){//Print received matrix
     for(int i = 0; i < N; i++){
         for(int j = 0; j < N; j++){
             printf("%.0f ", mat[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+void printMatrixInt(int N, int** mat){//Print received matrix
+    for(int i = 0; i < N; i++){
+        for(int j = 0; j < N; j++){
+            printf("%d ", mat[i][j]);
         }
         printf("\n");
     }
@@ -530,6 +540,28 @@ void findPathsOfLengthThree(float** adjacencyMatrix, int N) {
     }
 }
 
+int** findReachabilityMatrix(float** adjacencyMatrix, int N) {
+    int** reachabilityMatrix = (int**)malloc(N * sizeof(int*));
+    for (int i = 0; i < N; i++) {
+        reachabilityMatrix[i] = (int*)malloc(N * sizeof(int));
+        for (int j = 0; j < N; j++) {
+            reachabilityMatrix[i][j] = adjacencyMatrix[i][j];
+        }
+    }
+
+    for (int k = 0; k < N; k++) {
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                if (reachabilityMatrix[i][k] > 0 && reachabilityMatrix[k][j] > 0) {
+                    reachabilityMatrix[i][j] = 1;
+                }
+            }
+        }
+    }
+
+    return reachabilityMatrix;
+}
+
 //main function from which we call all needed function onclick of buttons. Also this function response all of calculations and let hem in argument of functions
 void mainFunc(int option, HWND hWnd, HDC hdc){
     const int N = 11;//Number of our vertex
@@ -550,6 +582,7 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
     int* outgoingDeg = outgoingDegrees(N, A);
     int* incomingDeg = incomingDegrees(N, A);
     int* IsolatedPendant = UndirIsolatedPendant(N, undirPower);
+    int** reachabilityMatrix = findReachabilityMatrix(A, N);
 
     switch(option){
         case 1:
@@ -609,9 +642,14 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
             printMatrix(N, A2);
             printf("\n");
             makeBinaryMatrix(A2Power2, N);
+            makeBinaryMatrix(A2Power3, N);
             drawGraph(hWnd, hdc, N, nx, ny, nn, A2);
             findPathsOfLengthTwo(A2, N);
             findPathsOfLengthThree(A2, N);
+            break;
+        case 8:
+            printMatrixInt(N, reachabilityMatrix);
+            drawGraph(hWnd, hdc, N, nx, ny, nn, A);
             break;
         default:
             break;
@@ -673,9 +711,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 
     hWnd = CreateWindow(ProgName, "Лабораторна робота 3. Виконав Д. М. Лесько", WS_OVERLAPPEDWINDOW, 100, 100, 1200, 700, (HWND)NULL, (HMENU)NULL, (HINSTANCE)hInstance, (HINSTANCE)NULL);
     ShowWindow(hWnd, nCmdShow);
-    while(GetMessage(&lpMsg, hWnd, 0, 0)){
-        TranslateMessage(&lpMsg);
-        DispatchMessage(&lpMsg);
+    int b;
+    while((b = GetMessage(&lpMsg, hWnd, 0, 0))!= 0) {
+        if(b == -1)	{
+            return lpMsg.wParam;
+        }
+        else {
+            TranslateMessage(&lpMsg);
+            DispatchMessage(&lpMsg);
+        }
     }
 
     return(lpMsg.wParam);
@@ -722,6 +766,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam){
                                   WS_VISIBLE | WS_CHILD | WS_BORDER,
                                   20, 200, 200, 30,
                                   hWnd, (HMENU) 7, NULL, NULL);
+            buttonReachable = CreateWindow("BUTTON",
+                                  "A2 matrix of reahability",
+                                  WS_VISIBLE | WS_CHILD | WS_BORDER,
+                                  20, 230, 200, 30,
+                                  hWnd, (HMENU) 8, NULL, NULL);
             break;
         case WM_COMMAND:
 
@@ -746,6 +795,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam){
                     break;
                 case 7:
                     windowUpdate(hWnd, hdc, ps, 7);
+                    break;
+                case 8:
+                    windowUpdate(hWnd, hdc, ps, 8);
                     break;
             }
             break;
