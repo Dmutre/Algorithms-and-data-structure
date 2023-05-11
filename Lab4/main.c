@@ -493,6 +493,26 @@ void makeBinaryMatrix(float** mat, int N){
         }
     }
 }
+
+void findPathsOfLengthTwo(float** adjacencyMatrix, int N) {
+    int count = 0;
+    printf("Paths of length two:\n");
+
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
+            if (adjacencyMatrix[i][j] == 1) {
+                for (int k = 0; k < N; k++) {
+                    if (adjacencyMatrix[j][k] == 1 && i != k) {
+                        printf("%d -> %d -> %d\n", (i+1), (j+1), (k+1));
+                        count++;
+                    }
+                }
+            }
+        }
+    }
+    printf("\n%d\n", count);
+}
+
 //main function from which we call all needed function onclick of buttons. Also this function response all of calculations and let hem in argument of functions
 void mainFunc(int option, HWND hWnd, HDC hdc){
     const int N = 11;//Number of our vertex
@@ -571,10 +591,9 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
         case 7:
             printMatrix(N, A2);
             printf("\n");
-            printMatrix(N, A2Power2);
-            printf("\n");
             makeBinaryMatrix(A2Power2, N);
-            printMatrix(N, A2Power2);
+            drawGraph(hWnd, hdc, N, nx, ny, nn, A2Power2);
+            findPathsOfLengthTwo(A2, N);
             break;
         default:
             break;
