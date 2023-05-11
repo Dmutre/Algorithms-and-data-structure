@@ -512,7 +512,7 @@ void findPathsOfLengthTwo(float** adjacencyMatrix, int N) {
         for (int j = 0; j < N; j++) {
             if (adjacencyMatrix[i][j] == 1) {
                 for (int k = 0; k < N; k++) {
-                    if (adjacencyMatrix[j][k] == 1 && i != k) {
+                    if (adjacencyMatrix[j][k] == 1) {
                         printf("%d -> %d -> %d\n", (i+1), (j+1), (k+1));
                     }
                 }
@@ -530,7 +530,7 @@ void findPathsOfLengthThree(float** adjacencyMatrix, int N) {
             for (int k = 0; k < N; k++) {
                 if (adjacencyMatrix[i][j] == 1 && adjacencyMatrix[j][k] == 1) {
                     for (int m = 0; m < N; m++) {
-                        if (adjacencyMatrix[k][m] == 1 && m != i) {
+                        if (adjacencyMatrix[k][m] == 1) {
                             printf("%d -> %d -> %d -> %d\n", (i+1), (j+1), (k+1), (m+1));
                         }
                     }
@@ -582,7 +582,7 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
     int* outgoingDeg = outgoingDegrees(N, A);
     int* incomingDeg = incomingDegrees(N, A);
     int* IsolatedPendant = UndirIsolatedPendant(N, undirPower);
-    int** reachabilityMatrix = findReachabilityMatrix(A, N);
+    int** reachabilityMatrix = findReachabilityMatrix(A2, N);
 
     switch(option){
         case 1:
@@ -639,17 +639,18 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
             printIntArray(N, undirPower);
             break;
         case 7:
-            printMatrix(N, A2);
-            printf("\n");
-            makeBinaryMatrix(A2Power2, N);
-            makeBinaryMatrix(A2Power3, N);
+            printf("(A2)^2:\n");
+            printMatrix(N, A2Power2);
+            printf("(A2)^3:\n");
+            printMatrix(N, A2Power3);
             drawGraph(hWnd, hdc, N, nx, ny, nn, A2);
             findPathsOfLengthTwo(A2, N);
             findPathsOfLengthThree(A2, N);
             break;
         case 8:
+            printf("Reachability matrix:\n");
             printMatrixInt(N, reachabilityMatrix);
-            drawGraph(hWnd, hdc, N, nx, ny, nn, A);
+            drawGraph(hWnd, hdc, N, nx, ny, nn, A2);
             break;
         default:
             break;
