@@ -10,9 +10,28 @@
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 //Declare our buttons
-HWND buttonDrawDirect, buttonDrawUnd, buttonPower, buttonRegCheck, buttonFindIsolated, buttonDraw2, buttonWays, buttonReachable;
+HWND buttonDrawDirect, buttonDrawUnd, buttonPower, buttonRegCheck, buttonFindIsolated, buttonDraw2, buttonWays, buttonReachable, buttonStronglyConnectedMat;
 
 char ProgName[] = "Лабораторна робота 4";
+
+
+void freeMatrix(float** matrix, int N){
+    if (matrix != NULL) {
+        for (int i = 0; i < N; i++) {
+            free(matrix[i]);
+        }
+        free(matrix);
+    }
+}
+
+void freeMatrixInt(int** matrix, int N){
+    if (matrix != NULL) {
+        for (int i = 0; i < N; i++) {
+            free(matrix[i]);
+        }
+        free(matrix);
+    }
+}
 
 void arrow(float fi, int px, int py, HDC hdc){//draw arrow
     int lx, ly, rx, ry;
@@ -504,6 +523,30 @@ void makeBinaryMatrix(float** mat, int N){
     }
 }
 
+float** transposeMatrix(float** matrix, int rows, int columns) {
+    float** result = (float**)malloc(columns * sizeof(float*));
+    for (int i = 0; i < columns; i++) {
+        result[i] = (float*)malloc(rows * sizeof(float));
+        for (int j = 0; j < rows; j++) {
+            result[i][j] = matrix[j][i];
+        }
+    }
+    return result;
+}
+
+float** multiplyMatricesStraight(float** mat1, float** mat2, int N) {
+    float** result = (float**)malloc(N * sizeof(float*));
+
+    for (int i = 0; i < N; i++) {
+        result[i] = (float*)malloc(N * sizeof(float));
+        for (int j = 0; j < N; j++) {
+            result[i][j] = mat1[i][j] * mat2[i][j];
+        }
+    }
+
+    return result;
+}
+
 void makeBinaryMatrixInt(int** mat, int N){
     for(int i = 0; i < N; i++){
         for(int j = 0; j < N; j++){
@@ -548,11 +591,11 @@ void findPathsOfLengthThree(float** adjacencyMatrix, int N) {
     }
 }
 
-int** findReachabilityMatrix(float** adjacencyMatrix, int N) {
-    int** reachabilityMatrix = (int**)malloc(N * sizeof(int*));
+float** findReachabilityMatrix(int** adjacencyMatrix, int N) {
+    float** reachabilityMatrix = (float**)malloc(N * sizeof(float*));
 
     for (int i = 0; i < N; i++) {
-        reachabilityMatrix[i] = (int*)malloc(N * sizeof(int));
+        reachabilityMatrix[i] = (float*)malloc(N * sizeof(float));
         for (int j = 0; j < N; j++) {
             if (adjacencyMatrix[i][j] > 0)
                 reachabilityMatrix[i][j] = 1;
@@ -572,6 +615,15 @@ int** findReachabilityMatrix(float** adjacencyMatrix, int N) {
     return reachabilityMatrix;
 }
 
+int** findStronglyConnectedMatrix(float** adjacencyMatrix, int N) {
+    float** trans = transposeMatrix(adjacencyMatrix, N, N);
+    float** result = multiplyMatricesStraight(adjacencyMatrix, trans, N);
+    //makeBinaryMatrix(result, N);
+
+    freeMatrix(trans, N);
+
+    return result;
+}
 
 //main function from which we call all needed function onclick of buttons. Also this function response all of calculations and let hem in argument of functions
 void mainFunc(int option, HWND hWnd, HDC hdc){
@@ -593,7 +645,8 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
     int* outgoingDeg = outgoingDegrees(N, A);
     int* incomingDeg = incomingDegrees(N, A);
     int* IsolatedPendant = UndirIsolatedPendant(N, undirPower);
-    int** reachabilityMatrix = findReachabilityMatrix(A2, N);
+    float** reachabilityMatrix = findReachabilityMatrix(A2, N);
+    float** strongConMat = findStronglyConnectedMatrix(reachabilityMatrix, N);
 
     switch(option){
         case 1:
@@ -660,7 +713,12 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
             break;
         case 8:
             printf("Reachability matrix:\n");
-            printMatrixInt(N, reachabilityMatrix);
+            printMatrix(N, reachabilityMatrix);
+            drawGraph(hWnd, hdc, N, nx, ny, nn, A2);
+            break;
+        case 9:
+            printf("Strongly connected matrix:\n");
+            printMatrix(N, strongConMat);
             drawGraph(hWnd, hdc, N, nx, ny, nn, A2);
             break;
         default:
@@ -783,6 +841,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam){
                                   WS_VISIBLE | WS_CHILD | WS_BORDER,
                                   20, 230, 200, 30,
                                   hWnd, (HMENU) 8, NULL, NULL);
+            buttonStronglyConnectedMat = CreateWindow("BUTTON",
+                                  "Strongly connected amtrix",
+                                  WS_VISIBLE | WS_CHILD | WS_BORDER,
+                                  20, 260, 200, 30,
+                                  hWnd, (HMENU) 9, NULL, NULL);
             break;
         case WM_COMMAND:
 
@@ -810,6 +873,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam){
                     break;
                 case 8:
                     windowUpdate(hWnd, hdc, ps, 8);
+                    break;
+                case 9:
+                    windowUpdate(hWnd, hdc, ps, 9);
                     break;
             }
             break;
