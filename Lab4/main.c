@@ -504,6 +504,14 @@ void makeBinaryMatrix(float** mat, int N){
     }
 }
 
+void makeBinaryMatrixInt(int** mat, int N){
+    for(int i = 0; i < N; i++){
+        for(int j = 0; j < N; j++){
+            if(mat[i][j] >= 1) mat[i][j] = 1;
+        }
+    }
+}
+
 void findPathsOfLengthTwo(float** adjacencyMatrix, int N) {
 
     printf("Paths of length two:\n");
@@ -542,25 +550,28 @@ void findPathsOfLengthThree(float** adjacencyMatrix, int N) {
 
 int** findReachabilityMatrix(float** adjacencyMatrix, int N) {
     int** reachabilityMatrix = (int**)malloc(N * sizeof(int*));
+
     for (int i = 0; i < N; i++) {
         reachabilityMatrix[i] = (int*)malloc(N * sizeof(int));
         for (int j = 0; j < N; j++) {
-            reachabilityMatrix[i][j] = adjacencyMatrix[i][j];
+            if (adjacencyMatrix[i][j] > 0)
+                reachabilityMatrix[i][j] = 1;
+            else
+                reachabilityMatrix[i][j] = 0;
         }
     }
 
     for (int k = 0; k < N; k++) {
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
-                if (reachabilityMatrix[i][k] > 0 && reachabilityMatrix[k][j] > 0) {
-                    reachabilityMatrix[i][j] = 1;
-                }
+                reachabilityMatrix[i][j] = reachabilityMatrix[i][j] || (reachabilityMatrix[i][k] && reachabilityMatrix[k][j]);
             }
         }
     }
 
     return reachabilityMatrix;
 }
+
 
 //main function from which we call all needed function onclick of buttons. Also this function response all of calculations and let hem in argument of functions
 void mainFunc(int option, HWND hWnd, HDC hdc){
@@ -768,7 +779,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam){
                                   20, 200, 200, 30,
                                   hWnd, (HMENU) 7, NULL, NULL);
             buttonReachable = CreateWindow("BUTTON",
-                                  "A2 matrix of reahability",
+                                  "A2 matrix of reachability",
                                   WS_VISIBLE | WS_CHILD | WS_BORDER,
                                   20, 230, 200, 30,
                                   hWnd, (HMENU) 8, NULL, NULL);
