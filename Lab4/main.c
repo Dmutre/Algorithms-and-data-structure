@@ -10,7 +10,8 @@
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 //Declare our buttons
-HWND buttonDrawDirect, buttonDrawUnd, buttonPower, buttonRegCheck, buttonFindIsolated, buttonDraw2, buttonWays, buttonReachable, buttonStronglyConnectedMat;
+HWND buttonDrawDirect, buttonDrawUnd, buttonPower, buttonRegCheck, buttonFindIsolated, buttonDraw2, buttonWays, buttonReachable, buttonStronglyConnectedMat,
+buttonComponent;
 
 char ProgName[] = "Лабораторна робота 4";
 
@@ -618,12 +619,71 @@ float** findReachabilityMatrix(int** adjacencyMatrix, int N) {
 int** findStronglyConnectedMatrix(float** adjacencyMatrix, int N) {
     float** trans = transposeMatrix(adjacencyMatrix, N, N);
     float** result = multiplyMatricesStraight(adjacencyMatrix, trans, N);
-    //makeBinaryMatrix(result, N);
 
     freeMatrix(trans, N);
 
     return result;
 }
+
+void DFS(int v, int** strongMatrix, int* visited, int N) {
+    visited[v] = 1;
+
+    for (int i = 0; i < N; i++) {
+        if (strongMatrix[v][i] == 1 && visited[i] == 0) {
+            DFS(i, strongMatrix, visited, N);
+        }
+    }
+}
+
+void findStronglyConnectedComponents(int** strongMatrix, int N) {
+    int* visited = (int*)malloc(N * sizeof(int));
+    for (int i = 0; i < N; i++) {
+        visited[i] = 0;
+    }
+
+    printf("Strongly Connected Components:\n");
+
+    int componentCount = 0;
+
+    for (int i = 0; i < N; i++) {
+        if (visited[i] == 0) {
+            printf("Component %d:", componentCount + 1);
+            DFS(i, strongMatrix, visited, N);
+            printf("\n");
+            componentCount++;
+        }
+    }
+
+    free(visited);
+}
+
+void printStronglyConnectedComponents(float** strongMatrix, int N) {
+    int* visited = (int*)calloc(N, sizeof(int));
+    int componentCount = 0;
+
+    for (int i = 1; i <= N; i++) {
+        if (!visited[i - 1]) {
+            componentCount++;
+            printf("Component %d: ", componentCount);
+            dfsPrint(i, strongMatrix, visited, N);
+            printf("\n");
+        }
+    }
+
+    free(visited);
+}
+
+void dfsPrint(int v, int** strongMatrix, int* visited, int N) {
+    visited[v - 1] = 1; // Mark the vertex as visited
+    printf("%d ", v);
+
+    for (int i = 1; i <= N; i++) {
+        if (strongMatrix[v - 1][i - 1] && !visited[i - 1]) {
+            dfsPrint(i, strongMatrix, visited, N);
+        }
+    }
+}
+
 
 //main function from which we call all needed function onclick of buttons. Also this function response all of calculations and let hem in argument of functions
 void mainFunc(int option, HWND hWnd, HDC hdc){
@@ -636,17 +696,17 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
     char** nn = symbolArray(N);
     float** T = randm(N);
     float** A = mulmr(0.66, T, N);//Fill our matrix
-    float** A2 = mulmr(0.71, T, N);
+    float** A2 = mulmr(0.6, T, N);
     float** A2Power2 = powerMatrix(A2, N, 2);
     float** A2Power3 = powerMatrix(A2, N, 3);
     float** symA = makeSymmetric(A, N);
     float** symA2 = makeSymmetric(A2, N);
+    float** reachabilityMatrix = findReachabilityMatrix(A2, N);
+    float** strongConMat = findStronglyConnectedMatrix(reachabilityMatrix, N);
     int* undirPower = powerOfUndirGraph(N, symA);
     int* outgoingDeg = outgoingDegrees(N, A);
     int* incomingDeg = incomingDegrees(N, A);
     int* IsolatedPendant = UndirIsolatedPendant(N, undirPower);
-    float** reachabilityMatrix = findReachabilityMatrix(A2, N);
-    float** strongConMat = findStronglyConnectedMatrix(reachabilityMatrix, N);
 
     switch(option){
         case 1:
@@ -720,6 +780,12 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
             printf("Strongly connected matrix:\n");
             printMatrix(N, strongConMat);
             drawGraph(hWnd, hdc, N, nx, ny, nn, A2);
+            break;
+        case 10:
+            //findStronglyConnectedComponents(strongConMat, N);
+            drawGraph(hWnd, hdc, N, nx, ny, nn, A2);
+            printf("\n");
+            printStronglyConnectedComponents(strongConMat, N);
             break;
         default:
             break;
@@ -842,10 +908,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam){
                                   20, 230, 200, 30,
                                   hWnd, (HMENU) 8, NULL, NULL);
             buttonStronglyConnectedMat = CreateWindow("BUTTON",
-                                  "Strongly connected amtrix",
+                                  "Strongly connected matrix",
                                   WS_VISIBLE | WS_CHILD | WS_BORDER,
                                   20, 260, 200, 30,
                                   hWnd, (HMENU) 9, NULL, NULL);
+            buttonComponent = CreateWindow("BUTTON",
+                                  "Components of str. connection",
+                                  WS_VISIBLE | WS_CHILD | WS_BORDER,
+                                  20, 290, 200, 30,
+                                  hWnd, (HMENU) 10, NULL, NULL);
             break;
         case WM_COMMAND:
 
@@ -876,6 +947,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam){
                     break;
                 case 9:
                     windowUpdate(hWnd, hdc, ps, 9);
+                    break;
+                case 10:
+                    windowUpdate(hWnd, hdc, ps, 10);
                     break;
             }
             break;
