@@ -356,12 +356,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 
     hWnd = CreateWindow(ProgName, "Лабораторна робота 3. Виконав Д. М. Лесько", WS_OVERLAPPEDWINDOW, 100, 100, 1200, 700, (HWND)NULL, (HMENU)NULL, (HINSTANCE)hInstance, (HINSTANCE)NULL);
     ShowWindow(hWnd, nCmdShow);
-    while(GetMessage(&lpMsg, hWnd, 0, 0)){
-        TranslateMessage(&lpMsg);
-        DispatchMessage(&lpMsg);
+    int b;
+    while((b = GetMessage(&lpMsg, hWnd, 0, 0))!= 0) {
+        if(b == -1)	{
+            return lpMsg.wParam;
+        }
+        else {
+            TranslateMessage(&lpMsg);
+            DispatchMessage(&lpMsg);
+        }
     }
 
-    return(lpMsg.wParam);
 }
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam){
