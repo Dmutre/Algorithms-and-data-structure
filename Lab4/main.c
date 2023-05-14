@@ -459,8 +459,6 @@ int* UndirIsolatedPendant(int N, int* array){//Function, that receive array of g
 }
 
 void printIsolatedPendant(int N, int* array){//Function that output numbers of isolated and pendant vertexes
-    int isolatedNum = 0;
-    int pendantNum = 0;
 
     printf("\nIsolated vertexes:\n");
     for(int i = 0; i < N; i++){
@@ -478,13 +476,12 @@ void printIsolatedPendant(int N, int* array){//Function that output numbers of i
 
 float** multiplyMatrices(float** mat1, float** mat2, int N) {
     float** result = (float**)malloc(N * sizeof(float*));
-    int i, j, k;
 
-    for (i = 0; i < N; i++) {
+    for (int i = 0; i < N; i++) {
         result[i] = (float*)malloc(N * sizeof(float));
-        for (j = 0; j < N; j++) {
+        for (int j = 0; j < N; j++) {
             result[i][j] = 0;
-            for (k = 0; k < N; k++) {
+            for (int k = 0; k < N; k++) {
                 result[i][j] += mat1[i][k] * mat2[k][j];
             }
         }
@@ -494,17 +491,16 @@ float** multiplyMatrices(float** mat1, float** mat2, int N) {
 }
 
 float** powerMatrix(float** matrix, int N, int power) {
-    int i;
     float** result = (float**)malloc(N * sizeof(float*));
 
-    for (i = 0; i < N; i++) {
+    for (int i = 0; i < N; i++) {
         result[i] = (float*)malloc(N * sizeof(float));
         for (int j = 0; j < N; j++) {
             result[i][j] = matrix[i][j];
         }
     }
 
-    for (i = 1; i < power; i++) {
+    for (int i = 1; i < power; i++) {
         float** temp = multiplyMatrices(result, matrix, N);
         for (int j = 0; j < N; j++) {
             free(result[j]);
@@ -674,18 +670,6 @@ float** getCondensedGraph(float** adjacencyMatrix, int N, int* componentCount) {
         }
     }
 
-    printf("Components of graph:\n");
-    for (int c = 1; c <= component; c++) {
-        printf("Component %d: ", c);
-        for (int i = 0; i < N; i++) {
-            if (componentLabels[i] == c) {
-                printf("%d ", i + 1);
-            }
-        }
-        printf("\n");
-    }
-
-    // Calculate the number of components and resize the condensedGraph
     int numComponents = component;
     float** condensedGraph = (float**)malloc(numComponents * sizeof(float*));
     for (int i = 0; i < numComponents; i++) {
@@ -713,26 +697,27 @@ float** getCondensedGraph(float** adjacencyMatrix, int N, int* componentCount) {
 void mainFunc(int option, HWND hWnd, HDC hdc){
     const int N = 11;//Number of our vertex
     int nx[N], ny[N];
+    int flag;
+    int components;
+
     arrayX(N, nx);
     arrayY(N, ny);
-    int flag;
 
     char** nn = symbolArray(N);
     float** T = randm(N);
     float** A = mulmr(0.66, T, N);//Fill our matrix
-    float** A2 = mulmr(0.6, T, N);
+    float** A2 = mulmr(0.71, T, N);
     float** A2Power2 = powerMatrix(A2, N, 2);
     float** A2Power3 = powerMatrix(A2, N, 3);
     float** symA = makeSymmetric(A, N);
     float** symA2 = makeSymmetric(A2, N);
     float** reachabilityMatrix = findReachabilityMatrix(A2, N);
     float** strongConMat = findStronglyConnectedMatrix(reachabilityMatrix, N);
+    float** condensate = getCondensedGraph(A2, N, &components);
     int* undirPower = powerOfUndirGraph(N, symA);
     int* outgoingDeg = outgoingDegrees(N, A);
     int* incomingDeg = incomingDegrees(N, A);
     int* IsolatedPendant = UndirIsolatedPendant(N, undirPower);
-    int components;
-    float** condensate = getCondensedGraph(A2, N, &components);
 
     switch(option){
         case 1:
@@ -813,35 +798,28 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
             printConnectedComponents(A2, N);
             break;
         case 11:
-            printf("%d\n", components);
-            printMatrix(components, condensate);
+            printConnectedComponents(A2, N);
             drawGraph(hWnd, hdc, components, nx, ny, nn, condensate);
             break;
         default:
             break;
     }
 
-    for(int i = 0; i < N; i++){
-        free(T[i]);
-        free(A[i]);
-        free(A2[i]);
-        free(symA[i]);
-        free(A2Power2[i]);
-        free(A2Power3[i]);
-        free(symA2[i]);
-    }
-    free(T);//To avoid problems with dynamic memory we free out matrix in the end of our program
-    free(A);
-    free(A2);
-    free(symA);
-    free(symA2);
-    free(A2Power2);
-    free(A2Power3);
     free(nn);
-    free(undirPower);
     free(outgoingDeg);
     free(incomingDeg);
+    free(undirPower);
     free(IsolatedPendant);
+    freeMatrix(T, N);
+    freeMatrix(A, N);
+    freeMatrix(A2, N);
+    freeMatrix(A2Power2, N);
+    freeMatrix(A2Power3, N);
+    freeMatrix(symA, N);
+    freeMatrix(symA2, N);
+    freeMatrix(reachabilityMatrix, N);
+    freeMatrix(strongConMat, N);
+    freeMatrix(condensate, components);
 }
 
 //function that refresh console and our app window from previous action. Also after cleaning call mainFunc() with options
