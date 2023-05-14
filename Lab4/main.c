@@ -11,7 +11,7 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 //Declare our buttons
 HWND buttonDrawDirect, buttonDrawUnd, buttonPower, buttonRegCheck, buttonFindIsolated, buttonDraw2, buttonWays, buttonReachable, buttonStronglyConnectedMat,
-buttonComponent;
+buttonComponent, buttonCondensat;
 
 char ProgName[] = "Лабораторна робота 4";
 
@@ -625,65 +625,89 @@ int** findStronglyConnectedMatrix(float** adjacencyMatrix, int N) {
     return result;
 }
 
-void DFS(int v, int** strongMatrix, int* visited, int N) {
-    visited[v] = 1;
+void dfs(int v, float** adjacencyMatrix, int* visited, int N) {
+    visited[v] = 1; // Позначаємо вершину як відвідану
+    printf("%d ", v + 1); // Виводимо номер вершини
 
     for (int i = 0; i < N; i++) {
-        if (strongMatrix[v][i] == 1 && visited[i] == 0) {
-            DFS(i, strongMatrix, visited, N);
+        if (adjacencyMatrix[v][i] != 0 && !visited[i]) {
+            dfs(i, adjacencyMatrix, visited, N); // Рекурсивний виклик для сусідньої вершини
         }
     }
 }
 
-void findStronglyConnectedComponents(int** strongMatrix, int N) {
-    int* visited = (int*)malloc(N * sizeof(int));
-    for (int i = 0; i < N; i++) {
-        visited[i] = 0;
-    }
-
-    printf("Strongly Connected Components:\n");
-
-    int componentCount = 0;
+void printConnectedComponents(float** adjacencyMatrix, int N) {
+    int* visited = (int*)calloc(N, sizeof(int)); // Масив відвіданих вершин
 
     for (int i = 0; i < N; i++) {
-        if (visited[i] == 0) {
-            printf("Component %d:", componentCount + 1);
-            DFS(i, strongMatrix, visited, N);
+        if (!visited[i]) {
+            printf("Component: ");
+            dfs(i, adjacencyMatrix, visited, N); // Запускаємо DFS для невідвіданої вершини
             printf("\n");
-            componentCount++;
         }
     }
 
     free(visited);
 }
 
-void printStronglyConnectedComponents(float** strongMatrix, int N) {
+void dfs2(float** adjacencyMatrix, int N, int vertex, int* visited, int* componentLabels, int* componentIndices, int component) {
+    visited[vertex] = 1;
+    componentLabels[vertex] = component;
+
+    for (int i = 0; i < N; i++) {
+        if (adjacencyMatrix[vertex][i] != 0 && !visited[i]) {
+            dfs2(adjacencyMatrix, N, i, visited, componentLabels, componentIndices, component);
+        }
+    }
+}
+
+float** getCondensedGraph(float** adjacencyMatrix, int N, int* componentCount) {
     int* visited = (int*)calloc(N, sizeof(int));
-    int componentCount = 0;
+    int* componentLabels = (int*)malloc(N * sizeof(int));
+    int* componentIndices = (int*)calloc(N, sizeof(int));
+    int component = 0;
 
-    for (int i = 1; i <= N; i++) {
-        if (!visited[i - 1]) {
-            componentCount++;
-            printf("Component %d: ", componentCount);
-            dfsPrint(i, strongMatrix, visited, N);
-            printf("\n");
+    for (int i = 0; i < N; i++) {
+        if (!visited[i]) {
+            component++;
+            dfs2(adjacencyMatrix, N, i, visited, componentLabels, componentIndices, component);
+        }
+    }
+
+    printf("Components of graph:\n");
+    for (int c = 1; c <= component; c++) {
+        printf("Component %d: ", c);
+        for (int i = 0; i < N; i++) {
+            if (componentLabels[i] == c) {
+                printf("%d ", i + 1);
+            }
+        }
+        printf("\n");
+    }
+
+    // Calculate the number of components and resize the condensedGraph
+    int numComponents = component;
+    float** condensedGraph = (float**)malloc(numComponents * sizeof(float*));
+    for (int i = 0; i < numComponents; i++) {
+        condensedGraph[i] = (float*)calloc(numComponents, sizeof(float));
+    }
+
+    for (int i = 0; i < N; i++) {
+        int componentLabel = componentLabels[i];
+        for (int j = 0; j < N; j++) {
+            if (adjacencyMatrix[i][j] != 0 && componentLabel != componentLabels[j]) {
+                condensedGraph[componentLabel - 1][componentLabels[j] - 1] = 1.0;
+            }
         }
     }
 
     free(visited);
+    free(componentLabels);
+    free(componentIndices);
+
+    *componentCount = numComponents;
+    return condensedGraph;
 }
-
-void dfsPrint(int v, int** strongMatrix, int* visited, int N) {
-    visited[v - 1] = 1; // Mark the vertex as visited
-    printf("%d ", v);
-
-    for (int i = 1; i <= N; i++) {
-        if (strongMatrix[v - 1][i - 1] && !visited[i - 1]) {
-            dfsPrint(i, strongMatrix, visited, N);
-        }
-    }
-}
-
 
 //main function from which we call all needed function onclick of buttons. Also this function response all of calculations and let hem in argument of functions
 void mainFunc(int option, HWND hWnd, HDC hdc){
@@ -707,6 +731,8 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
     int* outgoingDeg = outgoingDegrees(N, A);
     int* incomingDeg = incomingDegrees(N, A);
     int* IsolatedPendant = UndirIsolatedPendant(N, undirPower);
+    int components;
+    float** condensate = getCondensedGraph(A2, N, &components);
 
     switch(option){
         case 1:
@@ -782,10 +808,14 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
             drawGraph(hWnd, hdc, N, nx, ny, nn, A2);
             break;
         case 10:
-            //findStronglyConnectedComponents(strongConMat, N);
             drawGraph(hWnd, hdc, N, nx, ny, nn, A2);
             printf("\n");
-            printStronglyConnectedComponents(strongConMat, N);
+            printConnectedComponents(A2, N);
+            break;
+        case 11:
+            printf("%d\n", components);
+            printMatrix(components, condensate);
+            drawGraph(hWnd, hdc, components, nx, ny, nn, condensate);
             break;
         default:
             break;
@@ -917,6 +947,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam){
                                   WS_VISIBLE | WS_CHILD | WS_BORDER,
                                   20, 290, 200, 30,
                                   hWnd, (HMENU) 10, NULL, NULL);
+            buttonCondensat = CreateWindow("BUTTON",
+                                  "Graph of Condensate",
+                                  WS_VISIBLE | WS_CHILD | WS_BORDER,
+                                  20, 320, 200, 30,
+                                  hWnd, (HMENU) 11, NULL, NULL);
             break;
         case WM_COMMAND:
 
@@ -950,6 +985,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam){
                     break;
                 case 10:
                     windowUpdate(hWnd, hdc, ps, 10);
+                    break;
+                case 11:
+                    windowUpdate(hWnd, hdc, ps, 11);
                     break;
             }
             break;
