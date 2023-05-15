@@ -862,7 +862,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
     HWND hWnd;
     MSG lpMsg;
 
-    hWnd = CreateWindow(ProgName, "Лабораторна робота 3. Виконав Д. М. Лесько", WS_OVERLAPPEDWINDOW, 100, 100, 1200, 700, (HWND)NULL, (HMENU)NULL, (HINSTANCE)hInstance, (HINSTANCE)NULL);
+    hWnd = CreateWindow(ProgName, "Лабораторна робота 4. Виконав Д. М. Лесько", WS_OVERLAPPEDWINDOW, 100, 100, 1200, 700, (HWND)NULL, (HMENU)NULL, (HINSTANCE)hInstance, (HINSTANCE)NULL);
     ShowWindow(hWnd, nCmdShow);
     int b;
     while((b = GetMessage(&lpMsg, hWnd, 0, 0))!= 0) {
