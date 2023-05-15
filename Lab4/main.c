@@ -588,13 +588,13 @@ void findPathsOfLengthThree(float** adjacencyMatrix, int N) {
     }
 }
 
-float** findReachabilityMatrix(int** adjacencyMatrix, int N) {
+float** findReachabilityMatrix(float** adjacencyMatrix, int N) {
     float** reachabilityMatrix = (float**)malloc(N * sizeof(float*));
 
     for (int i = 0; i < N; i++) {
         reachabilityMatrix[i] = (float*)malloc(N * sizeof(float));
         for (int j = 0; j < N; j++) {
-            if (adjacencyMatrix[i][j] > 0)
+            if (adjacencyMatrix[i][j] > 0 || i == j)
                 reachabilityMatrix[i][j] = 1;
             else
                 reachabilityMatrix[i][j] = 0;
@@ -692,6 +692,7 @@ float** getCondensedGraph(float** adjacencyMatrix, int N, int* componentCount) {
     *componentCount = numComponents;
     return condensedGraph;
 }
+
 
 //main function from which we call all needed function onclick of buttons. Also this function response all of calculations and let hem in argument of functions
 void mainFunc(int option, HWND hWnd, HDC hdc){
