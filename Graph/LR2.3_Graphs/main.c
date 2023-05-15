@@ -292,12 +292,20 @@ void drawGraph(HWND hWnd, HDC hdc){
     }
 
     int atall = 0;
-    for(int i = 0; i < N; i++){//For lines between vertex
+    for(int i = 0; i < N; i++){
         for(int j = 0; j < N; j++){
             if(A[i][j] == 1){
                 atall++;
-                if(!(((abs(i-j) >=2 && abs(i-j) <= edgeCeil) || abs(i-j) >= 3*edgeCeil) && (nx[i] == nx[j] || ny[i] == ny[j])) && i != j){
+                if(i == j){
+                } else if(((abs(i-j) >=2 && abs(i-j) <= edgeCeil) || abs(i-j) >= 3*edgeCeil) && (nx[i] == nx[j] || ny[i] == ny[j])){
+                } else{
                     if(i > j && A[j][i] == 1){
+                        MoveToEx(hdc, nx[i], ny[i], NULL);
+                        LineTo(hdc, (nx[i]+nx[j])/2, (ny[i]+ny[j])/2+20);
+                        MoveToEx(hdc, (nx[i]+nx[j])/2, (ny[i]+ny[j])/2+20, NULL);
+                        LineTo(hdc, nx[j], ny[j]);
+                        drawArrow((nx[i]+nx[j])/2, (ny[i]+ny[j])/2+20, nx[j], ny[j], dx, hdc);
+                    } else if(ny[i] == ny[j]){
                         MoveToEx(hdc, nx[i], ny[i], NULL);
                         LineTo(hdc, (nx[i]+nx[j])/2+20, (ny[i]+ny[j])/2);
                         MoveToEx(hdc, (nx[i]+nx[j])/2+20, (ny[i]+ny[j])/2, NULL);
