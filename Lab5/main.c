@@ -10,10 +10,9 @@
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 //Declare our buttons
-HWND buttonStop;
+HWND buttonStop, buttonCheck;
 
 char ProgName[] = "Лабораторна робота 5";
-
 
 void freeMatrix(float** matrix, int N){
     if (matrix != NULL) {
@@ -279,14 +278,154 @@ void drawGraph(HWND hWnd, HDC hdc, int N, int nx[], int ny[], char** nn, float**
     }
 }
 
+void drawUndirectedGraph(HWND hWnd, HDC hdc, int n, int nx[], int ny[], char** nn, float** A){
+    int edgeCeil = ceil(n / 4.0);//Number of vertex, that we can draw four time to get squer
+    int dx = 16, dy = 16, dtx = 5;
+    HPEN KPen = CreatePen(PS_SOLID, 1, RGB(20, 20, 5));
+    SelectObject(hdc, KPen);
 
+    printf("Undirected A matrix:\n");//Output our matrix of dependencies
+    for(int i = 0; i < n; i++){
+        for(int j = 0; j < n; j++){
+            if(A[j][i] == 1 || A[i][j] == 1){
+                printf("1 ");
+            } else printf("%.0f ", A[i][j]);
+        }
+        printf("\n");
+    }
+
+    for(int i = 0; i < n; i++){//For ellipses
+        for(int j = 0; j < n; j++){
+            if(A[i][j] == 1){
+                if(i == j){
+                    int dir = (int) ceil((i+1)/(float) edgeCeil);
+                    if(dir%2 == 0){
+                        if(dir > edgeCeil){
+                            Ellipse(hdc, nx[i]-40, ny[i]-20, nx[i], ny[i]+20);
+                        } else{
+                            Ellipse(hdc, nx[i]+40, ny[i]-20, nx[i], ny[i]+20);
+                        }
+                    } else{
+                        if(dir >= edgeCeil){
+                            Ellipse(hdc, nx[i]-20, ny[i]+40, nx[i]+20, ny[i]);
+                        } else{
+                            Ellipse(hdc, nx[i]-20, ny[i]-40, nx[i]+20, ny[i]);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    for(int i = 0; i < n; i++){//For lines when circles are on the same row in X or Y
+        for(int j = 0; j < n; j++){
+            if(A[i][j] == 1 && ((abs(i-j) >=2 && abs(i-j) <= edgeCeil) || abs(i-j) >= 3*edgeCeil) && (nx[i] == nx[j] || ny[i] == ny[j])){
+                if(nx[i] == nx[j]){
+                    MoveToEx(hdc, nx[i], ny[i], NULL);
+                    LineTo(hdc, nx[j]+RADIUS, ny[i]-(ny[i]-ny[j])/2);
+                    MoveToEx(hdc, nx[j]+RADIUS, ny[i]-(ny[i]-ny[j])/2, NULL);
+                    LineTo(hdc, nx[j], ny[j]);
+                } else{
+                    MoveToEx(hdc, nx[i], ny[i], NULL);
+                    LineTo(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-RADIUS);
+                    MoveToEx(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-RADIUS, NULL);
+                    LineTo(hdc, nx[j], ny[j]);
+                }
+            }
+        }
+    }
+
+    for(int i = 0; i < n; i++){//For lines between vertex
+        for(int j = 0; j < n; j++){
+            if(A[i][j] == 1){
+                if(!(((abs(i-j) >=2 && abs(i-j) <= edgeCeil) || abs(i-j) >= 3*edgeCeil) && (nx[i] == nx[j] || ny[i] == ny[j])) && i != j){
+                    MoveToEx(hdc, nx[i], ny[i], NULL);
+                    LineTo(hdc, nx[j], ny[j]);
+                }
+            }
+        }
+    }
+
+    HPEN BPen = CreatePen(PS_SOLID, 2, RGB(50, 0, 255));
+
+    SelectObject(hdc, BPen);
+    for(int i = 0;i < n; i++){
+        Ellipse(hdc, nx[i]-dx,ny[i]-dy,nx[i]+dx,ny[i]+dy);
+        TextOut(hdc, nx[i]-dtx,ny[i]-dy/2, nn[i],2);
+    }
+}
+
+void bfs(float** adjacencyMatrix, int numVertices, int startVertex){
+    bool* visited = (bool*)malloc(numVertices * sizeof(bool));
+    for (int i = 0; i < numVertices; i++) {
+        visited[i] = false;
+    }
+
+    int* queue = (int*)malloc(numVertices * sizeof(int));
+    int front = 0;
+    int rear = 0;
+
+    queue[rear] = startVertex;
+    visited[startVertex] = true;
+
+    while (front <= rear) {
+        int currentVertex = queue[front++];
+        printf("Visited vertex: %d. ", (currentVertex+1));
+        printIntArray(numVertices, queue);
+        printf("\n");
+
+        for (int i = 0; i < numVertices; i++) {
+            if (adjacencyMatrix[currentVertex][i] != 0 && !visited[i]) {
+                queue[++rear] = i;
+                visited[i] = true;
+            }
+        }
+    }
+
+    free(visited);
+    free(queue);
+}
+
+void dfs(float** adjMatrix, int n, int startVertex) {
+    // Створюємо стек для зберігання вершин
+    int* stack = malloc(n * sizeof(int));
+    int top = -1;
+
+    // Створюємо масив, щоб позначати, чи була відвідана кожна вершина
+    int* visited = calloc(n, sizeof(int));
+
+    // Починаємо з початкової вершини
+    stack[++top] = startVertex;
+
+    while (top != -1) {
+        // Беремо вершину з верху стеку
+        int currentVertex = stack[top--];
+
+        // Якщо вершина вже відвідана, пропускаємо її
+        if (visited[currentVertex]) {
+            continue;
+        }
+
+        // Відмічаємо поточну вершину як відвідану та роздруковуємо її номер
+        visited[currentVertex] = 1;
+        printf("Visited: %d\n", (currentVertex+1));
+
+        // Додаємо у стек всі сусідні вершини, які ще не були відвідані
+        for (int i = n - 1; i >= 0; i--) {
+            if (adjMatrix[currentVertex][i] != 0 && !visited[i]) {
+                stack[++top] = i;
+            }
+        }
+    }
+
+    free(stack);
+    free(visited);
+}
 
 //main function from which we call all needed function onclick of buttons. Also this function response all of calculations and let hem in argument of functions
 void mainFunc(int option, HWND hWnd, HDC hdc){
     const int N = 11;//Number of our vertex
     int nx[N], ny[N];
-    int flag;
-    int components;
 
     arrayX(N, nx);
     arrayY(N, ny);
@@ -296,7 +435,10 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
     float** A = mulmr(0.825, T, N);//Fill our matrix
     float** symA = makeSymmetric(A, N);
 
-    drawGraph(hWnd, hdc, N, nx, ny, nn, A);
+    drawUndirectedGraph(hWnd, hdc, N, nx, ny, nn, A);
+    bfs(symA, N, 0);
+
+
 
     free(nn);
     freeMatrix(T, N);
@@ -368,6 +510,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam){
             switch(LOWORD(wParam)){
                 case 1:
                     windowUpdate(hWnd, hdc, ps, 1);
+                    break;
+                case 2:
+                    DestroyWindow(buttonCheck);
+                    InvalidateRect(hWnd, NULL, TRUE);
+                    HBRUSH hBrush = CreateSolidBrush(RGB(255, 255, 255)); // replace RGB(255, 255, 255) with desired background color
+                    UpdateWindow(hWnd);//Update our app window to make possible to draw new graph
+                    system("cls");//clear console
+                    hdc = BeginPaint(hWnd, &ps);
+                    FillRect(hdc, &ps.rcPaint, hBrush);
+                    EndPaint(hWnd, &ps);
                     break;
             }
             break;
