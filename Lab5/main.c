@@ -408,7 +408,7 @@ void dfs(float** adjMatrix, int n, int startVertex) {
 
         // Відмічаємо поточну вершину як відвідану та роздруковуємо її номер
         visited[currentVertex] = 1;
-        printf("Visited: %d\n", (currentVertex+1));
+        printf("Visited: %d\n", (1+currentVertex));
 
         // Додаємо у стек всі сусідні вершини, які ще не були відвідані
         for (int i = n - 1; i >= 0; i--) {
@@ -436,7 +436,7 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
     float** symA = makeSymmetric(A, N);
 
     drawUndirectedGraph(hWnd, hdc, N, nx, ny, nn, A);
-    bfs(symA, N, 0);
+    dfs(symA, N, 0);
 
 
 
