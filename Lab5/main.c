@@ -388,7 +388,7 @@ void bfs(float** adjacencyMatrix, int numVertices, int startVertex){
 
 void dfs(float** adjMatrix, int n, int startVertex) {
     // Створюємо стек для зберігання вершин
-    int* stack = malloc(n * sizeof(int));
+    int* stack = malloc((n*3) * sizeof(int));
     int top = -1;
 
     // Створюємо масив, щоб позначати, чи була відвідана кожна вершина
@@ -408,10 +408,10 @@ void dfs(float** adjMatrix, int n, int startVertex) {
 
         // Відмічаємо поточну вершину як відвідану та роздруковуємо її номер
         visited[currentVertex] = 1;
-        printf("Visited: %d\n", (1+currentVertex));
+        printf("Visited: %d\n", (1 + currentVertex));
 
         // Додаємо у стек всі сусідні вершини, які ще не були відвідані
-        for (int i = n - 1; i >= 0; i--) {
+        for (int i = n - 1; i > 0; i--) {
             if (adjMatrix[currentVertex][i] != 0 && !visited[i]) {
                 stack[++top] = i;
             }
