@@ -10,8 +10,8 @@
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 //Declare our buttons
-HWND buttonNext, buttonDFS, buttonBFS;
-bool waitingButton = true;
+HWND buttonDFS, buttonBFS, buttonNextBFS, buttonNextDFS;
+bool waitingButtonBFS = true, waitingButtonDFS = true;
 
 char ProgName[] = "Лабораторна робота 5";
 
@@ -347,7 +347,56 @@ void drawUndirectedGraph(HWND hWnd, HDC hdc, int n, int nx[], int ny[], char** n
     }
 }
 
-void bfs(float** adjacencyMatrix, int numVertices, int startVertex, HWND hWnd) {
+void drawTransition(HDC hdc, int N, int i, int j, int nx[], int ny[]){
+    int edgeCeil = ceil(N / 4.0);
+    int dx = 16;
+    COLORREF lineColor = RGB(255, 0, 0);
+    int lineWidth = 3; // Ширина лінії
+    HPEN hPen = CreatePen(PS_SOLID, lineWidth, lineColor);
+    SelectObject(hdc, hPen);
+
+    if(((abs(i-j) >=2 && abs(i-j) <= edgeCeil) || abs(i-j) >= 3*edgeCeil) && (nx[i] == nx[j] || ny[i] == ny[j])){
+        if(nx[i] == nx[j]){
+            if(i > j){
+                MoveToEx(hdc, nx[i], ny[i], NULL);
+                LineTo(hdc, nx[j]+RADIUS, ny[i]-(ny[i]-ny[j])/2);
+                MoveToEx(hdc, nx[j]+RADIUS, ny[i]-(ny[i]-ny[j])/2, NULL);
+                LineTo(hdc, nx[j], ny[j]);
+                drawArrow(nx[j]+RADIUS, ny[i]-(ny[i]-ny[j])/2, nx[j], ny[j], dx, hdc);
+            } else{
+                MoveToEx(hdc, nx[i], ny[i], NULL);
+                LineTo(hdc, nx[j]-RADIUS, ny[i]-(ny[i]-ny[j])/2);
+                MoveToEx(hdc, nx[j]-RADIUS, ny[i]-(ny[i]-ny[j])/2, NULL);
+                LineTo(hdc, nx[j], ny[j]);
+                drawArrow(nx[j]-RADIUS, ny[i]-(ny[i]-ny[j])/2, nx[j], ny[j], dx, hdc);
+            }
+        } else{
+            if(i > j){
+                MoveToEx(hdc, nx[i], ny[i], NULL);
+                LineTo(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]+RADIUS);
+                MoveToEx(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]+RADIUS, NULL);
+                LineTo(hdc, nx[j], ny[j]);
+                drawArrow(nx[j]+(nx[i]-nx[j])/2, ny[i]+RADIUS, nx[j], ny[j], dx, hdc);
+            } else{
+                MoveToEx(hdc, nx[i], ny[i], NULL);
+                LineTo(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-RADIUS);
+                MoveToEx(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-RADIUS, NULL);
+                LineTo(hdc, nx[j], ny[j]);
+                drawArrow(nx[j]+(nx[i]-nx[j])/2, ny[i]-RADIUS, nx[j], ny[j], dx, hdc);
+            }
+        }
+    } else{
+        MoveToEx(hdc, nx[i], ny[i], NULL);
+        LineTo(hdc, nx[j], ny[j]);
+        drawArrow(nx[i], ny[i], nx[j], ny[j], dx, hdc);
+        MoveToEx(hdc, nx[i], ny[i], NULL);
+    }
+
+    DeleteObject(hPen);
+    //ReleaseDC(hWnd, hdc);
+}
+
+void bfs(float** adjacencyMatrix, int numVertices, int startVertex, HWND hdc, int nx[], int ny[]) {
     bool* visited = (bool*)malloc(numVertices * sizeof(bool));
     for (int i = 0; i < numVertices; i++) {
         visited[i] = false;
@@ -368,10 +417,11 @@ void bfs(float** adjacencyMatrix, int numVertices, int startVertex, HWND hWnd) {
         int fromVertex = visitedFrom[currentVertex];
 
         printf("Visited vertex: %d. Visited from vertex: %d\n", (currentVertex + 1), (fromVertex + 1));
+        drawTransition(hdc, numVertices, fromVertex, currentVertex, nx, ny);
 
-        waitingButton = true;
+        waitingButtonBFS = true;
 
-        while (waitingButton) {
+        while (waitingButtonBFS) {
             MSG msg;
             GetMessage(&msg, NULL, 0, 0);
             TranslateMessage(&msg);
@@ -392,7 +442,7 @@ void bfs(float** adjacencyMatrix, int numVertices, int startVertex, HWND hWnd) {
     free(visitedFrom);
 }
 
-void dfs(float** adjMatrix, int n, int startVertex) {
+void dfs(float** adjMatrix, int n, int startVertex, HWND hdc, int nx[], int ny[]) {
     int* stack = malloc((n * 3) * sizeof(int));
     int top = -1;
 
@@ -417,9 +467,11 @@ void dfs(float** adjMatrix, int n, int startVertex) {
             printf("(start vertex)\n");
         }
 
-        waitingButton = true;
+        drawTransition(hdc, n, transitionFrom[currentVertex], currentVertex, nx, ny);
 
-        while(waitingButton){
+        waitingButtonDFS = true;
+
+        while(waitingButtonDFS){
             MSG msg;
             GetMessage(&msg, NULL, 0, 0);
             TranslateMessage(&msg);
@@ -455,11 +507,11 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
     switch(option){
         case 1:
             drawUndirectedGraph(hWnd, hdc, N, nx, ny, nn, A);
-            bfs(symA, N, 0, hWnd);
+            bfs(symA, N, 0, hdc, nx, ny);
             break;
         case 2:
             drawUndirectedGraph(hWnd, hdc, N, nx, ny, nn, A);
-            dfs(symA, N, 0);
+            dfs(symA, N, 0, hdc, nx, ny);
             break;
     }
 
@@ -532,11 +584,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam){
                                   WS_VISIBLE | WS_CHILD | WS_BORDER,
                                   20, 50, 150, 30,
                                   hWnd, (HMENU) 2, NULL, NULL);
-            buttonNext = CreateWindow("BUTTON",
-                                  "Go to next vertex",
+            buttonNextBFS = CreateWindow("BUTTON",
+                                  "Go to next vertex BFS",
                                   WS_VISIBLE | WS_CHILD | WS_BORDER,
                                   320, 20, 150, 30,
                                   hWnd, (HMENU) 3, NULL, NULL);
+            buttonNextDFS = CreateWindow("BUTTON",
+                                  "Go to next vertex DFS",
+                                  WS_VISIBLE | WS_CHILD | WS_BORDER,
+                                  320, 50, 150, 30,
+                                  hWnd, (HMENU) 4, NULL, NULL);
             break;
         case WM_COMMAND:
 
@@ -548,7 +605,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam){
                     windowUpdate(hWnd, hdc, ps, 2);
                     break;
                 case 3:
-                    waitingButton = false;
+                    waitingButtonBFS = false;
+                    break;
+                case 4:
+                    waitingButtonDFS = false;
+                    break;
             }
             break;
         case WM_PAINT:
