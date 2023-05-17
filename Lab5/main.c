@@ -10,7 +10,8 @@
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 //Declare our buttons
-HWND buttonStop, buttonCheck;
+HWND buttonNext, buttonDFS, buttonBFS;
+bool waitingButton = true;
 
 char ProgName[] = "Лабораторна робота 5";
 
@@ -355,71 +356,96 @@ void drawUndirectedGraph(HWND hWnd, HDC hdc, int n, int nx[], int ny[], char** n
     }
 }
 
-void bfs(float** adjacencyMatrix, int numVertices, int startVertex){
+void bfs(float** adjacencyMatrix, int numVertices, int startVertex, HWND hWnd) {
     bool* visited = (bool*)malloc(numVertices * sizeof(bool));
     for (int i = 0; i < numVertices; i++) {
         visited[i] = false;
     }
 
     int* queue = (int*)malloc(numVertices * sizeof(int));
+    int* visitedFrom = (int*)malloc(numVertices * sizeof(int));
+
     int front = 0;
     int rear = 0;
 
     queue[rear] = startVertex;
     visited[startVertex] = true;
+    visitedFrom[startVertex] = startVertex;
 
     while (front <= rear) {
         int currentVertex = queue[front++];
-        printf("Visited vertex: %d. ", (currentVertex+1));
-        printIntArray(numVertices, queue);
-        printf("\n");
+        int fromVertex = visitedFrom[currentVertex];
+
+        printf("Visited vertex: %d. Visited from vertex: %d\n", (currentVertex + 1), (fromVertex + 1));
+
+        waitingButton = true;
+
+        while (waitingButton) {
+            MSG msg;
+            GetMessage(&msg, NULL, 0, 0);
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
 
         for (int i = 0; i < numVertices; i++) {
             if (adjacencyMatrix[currentVertex][i] != 0 && !visited[i]) {
                 queue[++rear] = i;
                 visited[i] = true;
+                visitedFrom[i] = currentVertex;
             }
         }
     }
 
     free(visited);
     free(queue);
+    free(visitedFrom);
 }
 
 void dfs(float** adjMatrix, int n, int startVertex) {
-    // Створюємо стек для зберігання вершин
-    int* stack = malloc((n*3) * sizeof(int));
+    int* stack = malloc((n * 3) * sizeof(int));
     int top = -1;
 
-    // Створюємо масив, щоб позначати, чи була відвідана кожна вершина
     int* visited = calloc(n, sizeof(int));
+    int* transitionFrom = malloc(n * sizeof(int));
 
-    // Починаємо з початкової вершини
     stack[++top] = startVertex;
 
     while (top != -1) {
-        // Беремо вершину з верху стеку
         int currentVertex = stack[top--];
 
-        // Якщо вершина вже відвідана, пропускаємо її
         if (visited[currentVertex]) {
             continue;
         }
 
-        // Відмічаємо поточну вершину як відвідану та роздруковуємо її номер
         visited[currentVertex] = 1;
-        printf("Visited: %d\n", (1 + currentVertex));
+        printf("Visited: %d ", (1 + currentVertex));
 
-        // Додаємо у стек всі сусідні вершини, які ще не були відвідані
-        for (int i = n - 1; i > 0; i--) {
+        if (top >= 0) {
+            printf("Transition from: %d\n", (1 + transitionFrom[currentVertex]));
+        } else {
+            printf("\n");
+        }
+
+        waitingButton = true;
+
+        while(waitingButton){
+            MSG msg;
+            GetMessage(&msg, NULL, 0, 0);
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
+
+        for (int i = n - 1; i >= 0; i--) {
             if (adjMatrix[currentVertex][i] != 0 && !visited[i]) {
                 stack[++top] = i;
+                transitionFrom[i] = currentVertex;
             }
         }
     }
 
     free(stack);
     free(visited);
+    free(transitionFrom);
 }
 
 //main function from which we call all needed function onclick of buttons. Also this function response all of calculations and let hem in argument of functions
@@ -435,10 +461,16 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
     float** A = mulmr(0.825, T, N);//Fill our matrix
     float** symA = makeSymmetric(A, N);
 
-    drawUndirectedGraph(hWnd, hdc, N, nx, ny, nn, A);
-    dfs(symA, N, 0);
-
-
+    switch(option){
+        case 1:
+            drawUndirectedGraph(hWnd, hdc, N, nx, ny, nn, A);
+            bfs(symA, N, 0, hWnd);
+            break;
+        case 2:
+            drawUndirectedGraph(hWnd, hdc, N, nx, ny, nn, A);
+            dfs(symA, N, 0);
+            break;
+    }
 
     free(nn);
     freeMatrix(T, N);
@@ -499,11 +531,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam){
     switch(messg){
         case WM_CREATE:
 
-            buttonStop = CreateWindow("BUTTON",
-                                  "Draw directed graph",
+            buttonBFS = CreateWindow("BUTTON",
+                                  "Start BFS algorithm",
                                   WS_VISIBLE | WS_CHILD | WS_BORDER,
                                   20, 20, 150, 30,
                                   hWnd, (HMENU) 1, NULL, NULL);
+            buttonDFS = CreateWindow("BUTTON",
+                                  "Start DFS algorithm",
+                                  WS_VISIBLE | WS_CHILD | WS_BORDER,
+                                  20, 50, 150, 30,
+                                  hWnd, (HMENU) 2, NULL, NULL);
+            buttonNext = CreateWindow("BUTTON",
+                                  "Go to next vertex",
+                                  WS_VISIBLE | WS_CHILD | WS_BORDER,
+                                  320, 20, 150, 30,
+                                  hWnd, (HMENU) 3, NULL, NULL);
             break;
         case WM_COMMAND:
 
@@ -512,15 +554,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam){
                     windowUpdate(hWnd, hdc, ps, 1);
                     break;
                 case 2:
-                    DestroyWindow(buttonCheck);
-                    InvalidateRect(hWnd, NULL, TRUE);
-                    HBRUSH hBrush = CreateSolidBrush(RGB(255, 255, 255)); // replace RGB(255, 255, 255) with desired background color
-                    UpdateWindow(hWnd);//Update our app window to make possible to draw new graph
-                    system("cls");//clear console
-                    hdc = BeginPaint(hWnd, &ps);
-                    FillRect(hdc, &ps.rcPaint, hBrush);
-                    EndPaint(hWnd, &ps);
+                    windowUpdate(hWnd, hdc, ps, 2);
                     break;
+                case 3:
+                    waitingButton = false;
             }
             break;
         case WM_PAINT:
