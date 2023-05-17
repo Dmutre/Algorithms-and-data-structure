@@ -101,15 +101,6 @@ void printMatrix(int N, float** mat){//Print received matrix
     }
 }
 
-void printMatrixInt(int N, int** mat){//Print received matrix
-    for(int i = 0; i < N; i++){
-        for(int j = 0; j < N; j++){
-            printf("%d ", mat[i][j]);
-        }
-        printf("\n");
-    }
-}
-
 void printIntArray(int N, int* array){//Print received int array
     for(int i = 0; i < N; i++){
         printf("%d ", array[i]);
@@ -423,7 +414,7 @@ void dfs(float** adjMatrix, int n, int startVertex) {
         if (top >= 0) {
             printf("Transition from: %d\n", (1 + transitionFrom[currentVertex]));
         } else {
-            printf("\n");
+            printf("(start vertex)\n");
         }
 
         waitingButton = true;
