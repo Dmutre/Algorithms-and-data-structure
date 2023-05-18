@@ -347,7 +347,7 @@ void drawUndirectedGraph(HWND hWnd, HDC hdc, int n, int nx[], int ny[], char** n
     }
 }
 
-void drawCircle(HDC hdc, int x, int y, int radius) {
+void drawCircle(HDC hdc, int x, int y, int radius, char* c) {
     HBRUSH hBrush = CreateSolidBrush(RGB(255, 255, 255)); // Білий колір
     SelectObject(hdc, hBrush);
 
@@ -359,57 +359,67 @@ void drawCircle(HDC hdc, int x, int y, int radius) {
     Ellipse(hdc, left, top, right, bottom);
     FloodFill(hdc, x, y, RGB(255, 255, 255)); // Зафарбування внутрішньої частини кружка білим кольором
 
+    TextOut(hdc, x-radius, y-radius/2, c, 1);
+
     DeleteObject(hBrush);
 }
 
-void drawTransition(HDC hdc, int N, int i, int j, int nx[], int ny[]){
+void drawTransition(HDC hdc, int N, int i, int j, int nx[], int ny[], int last, int startVertex){
     int edgeCeil = ceil(N / 4.0);
     int r = 16;
     COLORREF lineColor = RGB(255, 0, 0);
     int lineWidth = 3; // Weight of lines
     HPEN hPen = CreatePen(PS_SOLID, lineWidth, lineColor);
     SelectObject(hdc, hPen);
+    if(i != startVertex){
+        drawCircle(hdc, nx[last], ny[last], r, "v");
+    }
 
     if(((abs(i-j) >=2 && abs(i-j) <= edgeCeil) || abs(i-j) >= 3*edgeCeil) && (nx[i] == nx[j] || ny[i] == ny[j])){
         if(nx[i] == nx[j]){
             if(i > j){
-                drawCircle(hdc, nx[i], ny[i], r);
                 MoveToEx(hdc, nx[i], ny[i], NULL);
                 LineTo(hdc, nx[j]+RADIUS, ny[i]-(ny[i]-ny[j])/2);
                 MoveToEx(hdc, nx[j]+RADIUS, ny[i]-(ny[i]-ny[j])/2, NULL);
                 LineTo(hdc, nx[j], ny[j]);
                 drawArrow(nx[j]+RADIUS, ny[i]-(ny[i]-ny[j])/2, nx[j], ny[j], r, hdc);
+                drawCircle(hdc, nx[j], ny[j], r, "v");
+                drawCircle(hdc, nx[i], ny[i], r, "a");
             } else{
-                drawCircle(hdc, nx[i], ny[i], r);
                 MoveToEx(hdc, nx[i], ny[i], NULL);
                 LineTo(hdc, nx[j]-RADIUS, ny[i]-(ny[i]-ny[j])/2);
                 MoveToEx(hdc, nx[j]-RADIUS, ny[i]-(ny[i]-ny[j])/2, NULL);
                 LineTo(hdc, nx[j], ny[j]);
                 drawArrow(nx[j]-RADIUS, ny[i]-(ny[i]-ny[j])/2, nx[j], ny[j], r, hdc);
+                drawCircle(hdc, nx[j], ny[j], r, "v");
+                drawCircle(hdc, nx[i], ny[i], r, "a");
             }
         } else{
             if(i > j){
-                drawCircle(hdc, nx[i], ny[i], r);
                 MoveToEx(hdc, nx[i], ny[i], NULL);
                 LineTo(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]+RADIUS);
                 MoveToEx(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]+RADIUS, NULL);
                 LineTo(hdc, nx[j], ny[j]);
                 drawArrow(nx[j]+(nx[i]-nx[j])/2, ny[i]+RADIUS, nx[j], ny[j], r, hdc);
+                drawCircle(hdc, nx[j], ny[j], r, "v");
+                drawCircle(hdc, nx[i], ny[i], r, "a");
             } else{
-                drawCircle(hdc, nx[i], ny[i], r);
                 MoveToEx(hdc, nx[i], ny[i], NULL);
                 LineTo(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-RADIUS);
                 MoveToEx(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-RADIUS, NULL);
                 LineTo(hdc, nx[j], ny[j]);
                 drawArrow(nx[j]+(nx[i]-nx[j])/2, ny[i]-RADIUS, nx[j], ny[j], r, hdc);
+                drawCircle(hdc, nx[j], ny[j], r, "v");
+                drawCircle(hdc, nx[i], ny[i], r, "a");
             }
         }
     } else{
-        drawCircle(hdc, nx[i], ny[i], r);
         MoveToEx(hdc, nx[i], ny[i], NULL);
         LineTo(hdc, nx[j], ny[j]);
         drawArrow(nx[i], ny[i], nx[j], ny[j], r, hdc);
         MoveToEx(hdc, nx[i], ny[i], NULL);
+        drawCircle(hdc, nx[j], ny[j], r, "v");
+        drawCircle(hdc, nx[i], ny[i], r, "a");
     }
 
     DeleteObject(hPen);
@@ -426,6 +436,7 @@ void bfs(float** adjacencyMatrix, int numVertices, int startVertex, HWND hdc, in
 
     int front = 0;
     int rear = 0;
+    int last = startVertex;
 
     queue[rear] = startVertex;
     visited[startVertex] = true;
@@ -436,7 +447,8 @@ void bfs(float** adjacencyMatrix, int numVertices, int startVertex, HWND hdc, in
         int fromVertex = visitedFrom[currentVertex];
 
         printf("Visited vertex: %d. Visited from vertex: %d\n", (currentVertex + 1), (fromVertex + 1));
-        drawTransition(hdc, numVertices, fromVertex, currentVertex, nx, ny);
+        drawTransition(hdc, numVertices, fromVertex, currentVertex, nx, ny, last, startVertex);
+        last = fromVertex;
 
         waitingButtonBFS = true;
 
@@ -464,6 +476,7 @@ void bfs(float** adjacencyMatrix, int numVertices, int startVertex, HWND hdc, in
 void dfs(float** adjMatrix, int n, int startVertex, HWND hdc, int nx[], int ny[]) {
     int* stack = malloc((n * 3) * sizeof(int));
     int top = -1;
+    int last = startVertex;
 
     int* visited = calloc(n, sizeof(int));
     int* transitionFrom = malloc(n * sizeof(int));
@@ -486,7 +499,8 @@ void dfs(float** adjMatrix, int n, int startVertex, HWND hdc, int nx[], int ny[]
             printf("(start vertex)\n");
         }
 
-        drawTransition(hdc, n, transitionFrom[currentVertex], currentVertex, nx, ny);
+        drawTransition(hdc, n, transitionFrom[currentVertex], currentVertex, nx, ny, last, startVertex);
+        last = transitionFrom[currentVertex];
 
         waitingButtonDFS = true;
 
