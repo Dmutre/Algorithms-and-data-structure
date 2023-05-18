@@ -347,53 +347,72 @@ void drawUndirectedGraph(HWND hWnd, HDC hdc, int n, int nx[], int ny[], char** n
     }
 }
 
+void drawCircle(HDC hdc, int x, int y, int radius) {
+    HBRUSH hBrush = CreateSolidBrush(RGB(255, 255, 255)); // Білий колір
+    SelectObject(hdc, hBrush);
+
+    int left = x - radius;
+    int top = y - radius;
+    int right = x + radius;
+    int bottom = y + radius;
+
+    Ellipse(hdc, left, top, right, bottom);
+    FloodFill(hdc, x, y, RGB(255, 255, 255)); // Зафарбування внутрішньої частини кружка білим кольором
+
+    DeleteObject(hBrush);
+}
+
 void drawTransition(HDC hdc, int N, int i, int j, int nx[], int ny[]){
     int edgeCeil = ceil(N / 4.0);
-    int dx = 16;
+    int r = 16;
     COLORREF lineColor = RGB(255, 0, 0);
-    int lineWidth = 3; // ГГЁГ°ГЁГ­Г  Г«ВіГ­ВіВї
+    int lineWidth = 3; // Weight of lines
     HPEN hPen = CreatePen(PS_SOLID, lineWidth, lineColor);
     SelectObject(hdc, hPen);
 
     if(((abs(i-j) >=2 && abs(i-j) <= edgeCeil) || abs(i-j) >= 3*edgeCeil) && (nx[i] == nx[j] || ny[i] == ny[j])){
         if(nx[i] == nx[j]){
             if(i > j){
+                drawCircle(hdc, nx[i], ny[i], r);
                 MoveToEx(hdc, nx[i], ny[i], NULL);
                 LineTo(hdc, nx[j]+RADIUS, ny[i]-(ny[i]-ny[j])/2);
                 MoveToEx(hdc, nx[j]+RADIUS, ny[i]-(ny[i]-ny[j])/2, NULL);
                 LineTo(hdc, nx[j], ny[j]);
-                drawArrow(nx[j]+RADIUS, ny[i]-(ny[i]-ny[j])/2, nx[j], ny[j], dx, hdc);
+                drawArrow(nx[j]+RADIUS, ny[i]-(ny[i]-ny[j])/2, nx[j], ny[j], r, hdc);
             } else{
+                drawCircle(hdc, nx[i], ny[i], r);
                 MoveToEx(hdc, nx[i], ny[i], NULL);
                 LineTo(hdc, nx[j]-RADIUS, ny[i]-(ny[i]-ny[j])/2);
                 MoveToEx(hdc, nx[j]-RADIUS, ny[i]-(ny[i]-ny[j])/2, NULL);
                 LineTo(hdc, nx[j], ny[j]);
-                drawArrow(nx[j]-RADIUS, ny[i]-(ny[i]-ny[j])/2, nx[j], ny[j], dx, hdc);
+                drawArrow(nx[j]-RADIUS, ny[i]-(ny[i]-ny[j])/2, nx[j], ny[j], r, hdc);
             }
         } else{
             if(i > j){
+                drawCircle(hdc, nx[i], ny[i], r);
                 MoveToEx(hdc, nx[i], ny[i], NULL);
                 LineTo(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]+RADIUS);
                 MoveToEx(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]+RADIUS, NULL);
                 LineTo(hdc, nx[j], ny[j]);
-                drawArrow(nx[j]+(nx[i]-nx[j])/2, ny[i]+RADIUS, nx[j], ny[j], dx, hdc);
+                drawArrow(nx[j]+(nx[i]-nx[j])/2, ny[i]+RADIUS, nx[j], ny[j], r, hdc);
             } else{
+                drawCircle(hdc, nx[i], ny[i], r);
                 MoveToEx(hdc, nx[i], ny[i], NULL);
                 LineTo(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-RADIUS);
                 MoveToEx(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-RADIUS, NULL);
                 LineTo(hdc, nx[j], ny[j]);
-                drawArrow(nx[j]+(nx[i]-nx[j])/2, ny[i]-RADIUS, nx[j], ny[j], dx, hdc);
+                drawArrow(nx[j]+(nx[i]-nx[j])/2, ny[i]-RADIUS, nx[j], ny[j], r, hdc);
             }
         }
     } else{
+        drawCircle(hdc, nx[i], ny[i], r);
         MoveToEx(hdc, nx[i], ny[i], NULL);
         LineTo(hdc, nx[j], ny[j]);
-        drawArrow(nx[i], ny[i], nx[j], ny[j], dx, hdc);
+        drawArrow(nx[i], ny[i], nx[j], ny[j], r, hdc);
         MoveToEx(hdc, nx[i], ny[i], NULL);
     }
 
     DeleteObject(hPen);
-    //ReleaseDC(hWnd, hdc);
 }
 
 void bfs(float** adjacencyMatrix, int numVertices, int startVertex, HWND hdc, int nx[], int ny[]) {
