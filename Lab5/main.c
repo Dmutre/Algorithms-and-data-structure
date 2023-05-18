@@ -13,7 +13,7 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 HWND buttonDFS, buttonBFS, buttonNextBFS, buttonNextDFS;
 bool waitingButtonBFS = true, waitingButtonDFS = true;
 
-char ProgName[] = "Лабораторна робота 5";
+char ProgName[] = "Lab 5";
 
 void freeMatrix(float** matrix, int N){
     if (matrix != NULL) {
@@ -351,7 +351,7 @@ void drawTransition(HDC hdc, int N, int i, int j, int nx[], int ny[]){
     int edgeCeil = ceil(N / 4.0);
     int dx = 16;
     COLORREF lineColor = RGB(255, 0, 0);
-    int lineWidth = 3; // Ширина лінії
+    int lineWidth = 3; // ГГЁГ°ГЁГ­Г  Г«ВіГ­ВіВї
     HPEN hPen = CreatePen(PS_SOLID, lineWidth, lineColor);
     SelectObject(hdc, hPen);
 
@@ -552,7 +552,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
     HWND hWnd;
     MSG lpMsg;
 
-    hWnd = CreateWindow(ProgName, "Лабораторна робота 5. Виконав Д. М. Лесько", WS_OVERLAPPEDWINDOW, 100, 100, 1200, 700, (HWND)NULL, (HMENU)NULL, (HINSTANCE)hInstance, (HINSTANCE)NULL);
+    hWnd = CreateWindow(ProgName, "Lab 5. Lesko Dmytro IM-21", WS_OVERLAPPEDWINDOW, 100, 100, 1200, 700, (HWND)NULL, (HMENU)NULL, (HINSTANCE)hInstance, (HINSTANCE)NULL);
     ShowWindow(hWnd, nCmdShow);
     int b;
     while((b = GetMessage(&lpMsg, hWnd, 0, 0))!= 0) {
