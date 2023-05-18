@@ -347,8 +347,8 @@ void drawUndirectedGraph(HWND hWnd, HDC hdc, int n, int nx[], int ny[], char** n
     }
 }
 
-void drawCircle(HDC hdc, int x, int y, int radius, char* c) {
-    HBRUSH hBrush = CreateSolidBrush(RGB(255, 255, 255)); // Білий колір
+void drawCircle(HDC hdc, int x, int y, int radius, char* c, COLORREF color) {
+    HBRUSH hBrush = CreateSolidBrush(color);
     SelectObject(hdc, hBrush);
 
     int left = x - radius;
@@ -357,78 +357,92 @@ void drawCircle(HDC hdc, int x, int y, int radius, char* c) {
     int bottom = y + radius;
 
     Ellipse(hdc, left, top, right, bottom);
-    FloodFill(hdc, x, y, RGB(255, 255, 255)); // Зафарбування внутрішньої частини кружка білим кольором
+    FloodFill(hdc, x, y, color);
 
-    TextOut(hdc, x-radius, y-radius/2, c, 1);
-
+    TextOut(hdc, x - radius / 2, y - radius / 4, c, strlen(c));
     DeleteObject(hBrush);
 }
 
-void drawTransition(HDC hdc, int N, int i, int j, int nx[], int ny[], int last, int startVertex){
+void drawTransition(HDC hdc, int N, int i, int j, int nx[], int ny[], int last, int startVertex, int counter, int visited[]) {
     int edgeCeil = ceil(N / 4.0);
     int r = 16;
     COLORREF lineColor = RGB(255, 0, 0);
     int lineWidth = 3; // Weight of lines
     HPEN hPen = CreatePen(PS_SOLID, lineWidth, lineColor);
     SelectObject(hdc, hPen);
-    if(i != startVertex){
-        drawCircle(hdc, nx[last], ny[last], r, "v");
+
+    if (i != startVertex) {
+        drawCircle(hdc, nx[last], ny[last], r, "v", RGB(255, 255, 255)); // Білий колір
     }
 
-    if(((abs(i-j) >=2 && abs(i-j) <= edgeCeil) || abs(i-j) >= 3*edgeCeil) && (nx[i] == nx[j] || ny[i] == ny[j])){
-        if(nx[i] == nx[j]){
-            if(i > j){
+    if (((abs(i - j) >= 2 && abs(i - j) <= edgeCeil) || abs(i - j) >= 3 * edgeCeil) && (nx[i] == nx[j] || ny[i] == ny[j])) {
+        if (nx[i] == nx[j]) {
+            if (i > j) {
                 MoveToEx(hdc, nx[i], ny[i], NULL);
-                LineTo(hdc, nx[j]+RADIUS, ny[i]-(ny[i]-ny[j])/2);
-                MoveToEx(hdc, nx[j]+RADIUS, ny[i]-(ny[i]-ny[j])/2, NULL);
+                LineTo(hdc, nx[j] + RADIUS, ny[i] - (ny[i] - ny[j]) / 2);
+                MoveToEx(hdc, nx[j] + RADIUS, ny[i] - (ny[i] - ny[j]) / 2, NULL);
                 LineTo(hdc, nx[j], ny[j]);
-                drawArrow(nx[j]+RADIUS, ny[i]-(ny[i]-ny[j])/2, nx[j], ny[j], r, hdc);
-                drawCircle(hdc, nx[j], ny[j], r, "v");
-                drawCircle(hdc, nx[i], ny[i], r, "a");
-            } else{
-                MoveToEx(hdc, nx[i], ny[i], NULL);
-                LineTo(hdc, nx[j]-RADIUS, ny[i]-(ny[i]-ny[j])/2);
-                MoveToEx(hdc, nx[j]-RADIUS, ny[i]-(ny[i]-ny[j])/2, NULL);
-                LineTo(hdc, nx[j], ny[j]);
-                drawArrow(nx[j]-RADIUS, ny[i]-(ny[i]-ny[j])/2, nx[j], ny[j], r, hdc);
-                drawCircle(hdc, nx[j], ny[j], r, "v");
-                drawCircle(hdc, nx[i], ny[i], r, "a");
+                drawArrow(nx[j] + RADIUS, ny[i] - (ny[i] - ny[j]) / 2, nx[j], ny[j], r, hdc);
+                drawCircle(hdc, nx[j], ny[j], r, "v", RGB(0, 255, 0)); // Активна вершина
+                drawCircle(hdc, nx[i], ny[i], r, "a", RGB(255, 0, 0)); // Закрита вершина
             }
-        } else{
-            if(i > j){
+            else {
                 MoveToEx(hdc, nx[i], ny[i], NULL);
-                LineTo(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]+RADIUS);
-                MoveToEx(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]+RADIUS, NULL);
+                LineTo(hdc, nx[j] - RADIUS, ny[i] - (ny[i] - ny[j]) / 2);
+                MoveToEx(hdc, nx[j] - RADIUS, ny[i] - (ny[i] - ny[j]) / 2, NULL);
                 LineTo(hdc, nx[j], ny[j]);
-                drawArrow(nx[j]+(nx[i]-nx[j])/2, ny[i]+RADIUS, nx[j], ny[j], r, hdc);
-                drawCircle(hdc, nx[j], ny[j], r, "v");
-                drawCircle(hdc, nx[i], ny[i], r, "a");
-            } else{
-                MoveToEx(hdc, nx[i], ny[i], NULL);
-                LineTo(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-RADIUS);
-                MoveToEx(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-RADIUS, NULL);
-                LineTo(hdc, nx[j], ny[j]);
-                drawArrow(nx[j]+(nx[i]-nx[j])/2, ny[i]-RADIUS, nx[j], ny[j], r, hdc);
-                drawCircle(hdc, nx[j], ny[j], r, "v");
-                drawCircle(hdc, nx[i], ny[i], r, "a");
+                drawArrow(nx[j] - RADIUS, ny[i] - (ny[i] - ny[j]) / 2, nx[j], ny[j], r, hdc);
+                drawCircle(hdc, nx[j], ny[j], r, "v", RGB(0, 255, 0)); // Активна вершина
+                drawCircle(hdc, nx[i], ny[i], r, "a", RGB(255, 0, 0)); // Закрита вершина
             }
         }
-    } else{
+        else {
+            if (i > j) {
+                MoveToEx(hdc, nx[i], ny[i], NULL);
+                LineTo(hdc, nx[j] + (nx[i] - nx[j]) / 2, ny[i] + RADIUS);
+                MoveToEx(hdc, nx[j] + (nx[i] - nx[j]) / 2, ny[i] + RADIUS, NULL);
+                LineTo(hdc, nx[j], ny[j]);
+                drawArrow(nx[j] + (nx[i] - nx[j]) / 2, ny[i] + RADIUS, nx[j], ny[j], r, hdc);
+                drawCircle(hdc, nx[j], ny[j], r, "v", RGB(0, 255, 0)); // Активна вершина
+                drawCircle(hdc, nx[i], ny[i], r, "a", RGB(255, 0, 0)); // Закрита вершина
+            }
+            else {
+                MoveToEx(hdc, nx[i], ny[i], NULL);
+                LineTo(hdc, nx[j] + (nx[i] - nx[j]) / 2, ny[i] - RADIUS);
+                MoveToEx(hdc, nx[j] + (nx[i] - nx[j]) / 2, ny[i] - RADIUS, NULL);
+                LineTo(hdc, nx[j], ny[j]);
+                drawArrow(nx[j] + (nx[i] - nx[j]) / 2, ny[i] - RADIUS, nx[j], ny[j], r, hdc);
+                drawCircle(hdc, nx[j], ny[j], r, "v", RGB(0, 255, 0)); // Активна вершина
+                drawCircle(hdc, nx[i], ny[i], r, "a", RGB(255, 0, 0)); // Закрита вершина
+            }
+        }
+    }
+    else {
         MoveToEx(hdc, nx[i], ny[i], NULL);
         LineTo(hdc, nx[j], ny[j]);
         drawArrow(nx[i], ny[i], nx[j], ny[j], r, hdc);
         MoveToEx(hdc, nx[i], ny[i], NULL);
-        drawCircle(hdc, nx[j], ny[j], r, "v");
-        drawCircle(hdc, nx[i], ny[i], r, "a");
+        drawCircle(hdc, nx[j], ny[j], r, "v", RGB(0, 255, 0)); // Активна вершина
+        drawCircle(hdc, nx[i], ny[i], r, "a", RGB(255, 0, 0)); // Закрита вершина
+    }
+
+    if (i != last) {
+        for (int g = 0; g < counter; g++) {
+            drawCircle(hdc, nx[visited[g]], ny[visited[g]], r, "c", RGB(0, 0, 255)); // Відвідана вершина
+        }
+    }
+
+    if (i != last) {
+        drawCircle(hdc, nx[last], ny[last], r, "c", RGB(0, 0, 255)); // Відвідана вершина
     }
 
     DeleteObject(hPen);
 }
 
 void bfs(float** adjacencyMatrix, int numVertices, int startVertex, HWND hdc, int nx[], int ny[]) {
-    bool* visited = (bool*)malloc(numVertices * sizeof(bool));
+    int* visited = (int*)malloc(numVertices * sizeof(int));
     for (int i = 0; i < numVertices; i++) {
-        visited[i] = false;
+        visited[i] = 0;
     }
 
     int* queue = (int*)malloc(numVertices * sizeof(int));
@@ -437,17 +451,19 @@ void bfs(float** adjacencyMatrix, int numVertices, int startVertex, HWND hdc, in
     int front = 0;
     int rear = 0;
     int last = startVertex;
+    int counter = 0;
 
     queue[rear] = startVertex;
-    visited[startVertex] = true;
+    visited[startVertex] = 1;
     visitedFrom[startVertex] = startVertex;
 
     while (front <= rear) {
+        counter++;
         int currentVertex = queue[front++];
         int fromVertex = visitedFrom[currentVertex];
 
         printf("Visited vertex: %d. Visited from vertex: %d\n", (currentVertex + 1), (fromVertex + 1));
-        drawTransition(hdc, numVertices, fromVertex, currentVertex, nx, ny, last, startVertex);
+        drawTransition(hdc, numVertices, fromVertex, currentVertex, nx, ny, last, startVertex, counter, queue);
         last = fromVertex;
 
         waitingButtonBFS = true;
@@ -460,9 +476,9 @@ void bfs(float** adjacencyMatrix, int numVertices, int startVertex, HWND hdc, in
         }
 
         for (int i = 0; i < numVertices; i++) {
-            if (adjacencyMatrix[currentVertex][i] != 0 && !visited[i]) {
+            if (adjacencyMatrix[currentVertex][i] != 0 && visited[i] == 0) {
                 queue[++rear] = i;
-                visited[i] = true;
+                visited[i] = 1;
                 visitedFrom[i] = currentVertex;
             }
         }
@@ -477,13 +493,14 @@ void dfs(float** adjMatrix, int n, int startVertex, HWND hdc, int nx[], int ny[]
     int* stack = malloc((n * 3) * sizeof(int));
     int top = -1;
     int last = startVertex;
-
+    int counter = 0;
     int* visited = calloc(n, sizeof(int));
     int* transitionFrom = malloc(n * sizeof(int));
 
     stack[++top] = startVertex;
 
     while (top != -1) {
+        counter++;
         int currentVertex = stack[top--];
 
         if (visited[currentVertex]) {
@@ -499,7 +516,7 @@ void dfs(float** adjMatrix, int n, int startVertex, HWND hdc, int nx[], int ny[]
             printf("(start vertex)\n");
         }
 
-        drawTransition(hdc, n, transitionFrom[currentVertex], currentVertex, nx, ny, last, startVertex);
+        drawTransition(hdc, n, transitionFrom[currentVertex], currentVertex, nx, ny, last, startVertex, counter, visited);
         last = transitionFrom[currentVertex];
 
         waitingButtonDFS = true;
