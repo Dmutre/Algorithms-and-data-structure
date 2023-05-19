@@ -516,7 +516,7 @@ void dfs(float** adjMatrix, int n, int startVertex, HWND hdc, int nx[], int ny[]
             printf("(start vertex)\n");
         }
 
-        drawTransition(hdc, n, transitionFrom[currentVertex], currentVertex, nx, ny, last, startVertex, counter, visited);
+        //drawTransition(hdc, n, transitionFrom[currentVertex], currentVertex, nx, ny, last, startVertex, counter, visited);
         last = transitionFrom[currentVertex];
 
         waitingButtonDFS = true;
@@ -556,12 +556,12 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
 
     switch(option){
         case 1:
-            drawUndirectedGraph(hWnd, hdc, N, nx, ny, nn, A);
-            bfs(symA, N, 0, hdc, nx, ny);
+            drawGraph(hWnd, hdc, N, nx, ny, nn, A);
+            bfs(A, N, 0, hdc, nx, ny);
             break;
         case 2:
-            drawUndirectedGraph(hWnd, hdc, N, nx, ny, nn, A);
-            dfs(symA, N, 0, hdc, nx, ny);
+            drawGraph(hWnd, hdc, N, nx, ny, nn, A);
+            dfs(A, N, 0, hdc, nx, ny);
             break;
     }
 
