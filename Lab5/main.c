@@ -370,9 +370,10 @@ void drawTransition(HDC hdc, int N, int i, int j, int nx[], int ny[], int last, 
     int lineWidth = 3; // Weight of lines
     HPEN hPen = CreatePen(PS_SOLID, lineWidth, lineColor);
     SelectObject(hdc, hPen);
+    bool visitedI, visitedJ;
 
     if (i != startVertex) {
-        drawCircle(hdc, nx[last], ny[last], r, "v", RGB(255, 255, 255)); // Білий колір
+        drawCircle(hdc, nx[last], ny[last], r, "v", RGB(255, 255, 255));
     }
 
     if (((abs(i - j) >= 2 && abs(i - j) <= edgeCeil) || abs(i - j) >= 3 * edgeCeil) && (nx[i] == nx[j] || ny[i] == ny[j])) {
@@ -383,8 +384,8 @@ void drawTransition(HDC hdc, int N, int i, int j, int nx[], int ny[], int last, 
                 MoveToEx(hdc, nx[j] + RADIUS, ny[i] - (ny[i] - ny[j]) / 2, NULL);
                 LineTo(hdc, nx[j], ny[j]);
                 drawArrow(nx[j] + RADIUS, ny[i] - (ny[i] - ny[j]) / 2, nx[j], ny[j], r, hdc);
-                drawCircle(hdc, nx[j], ny[j], r, "v", RGB(0, 255, 0)); // Активна вершина
-                drawCircle(hdc, nx[i], ny[i], r, "a", RGB(255, 0, 0)); // Закрита вершина
+                drawCircle(hdc, nx[j], ny[j], r, "v", RGB(0, 255, 0));
+                drawCircle(hdc, nx[i], ny[i], r, "a", RGB(255, 0, 0));
             }
             else {
                 MoveToEx(hdc, nx[i], ny[i], NULL);
@@ -392,8 +393,8 @@ void drawTransition(HDC hdc, int N, int i, int j, int nx[], int ny[], int last, 
                 MoveToEx(hdc, nx[j] - RADIUS, ny[i] - (ny[i] - ny[j]) / 2, NULL);
                 LineTo(hdc, nx[j], ny[j]);
                 drawArrow(nx[j] - RADIUS, ny[i] - (ny[i] - ny[j]) / 2, nx[j], ny[j], r, hdc);
-                drawCircle(hdc, nx[j], ny[j], r, "v", RGB(0, 255, 0)); // Активна вершина
-                drawCircle(hdc, nx[i], ny[i], r, "a", RGB(255, 0, 0)); // Закрита вершина
+                drawCircle(hdc, nx[j], ny[j], r, "v", RGB(0, 255, 0));
+                drawCircle(hdc, nx[i], ny[i], r, "a", RGB(255, 0, 0));
             }
         }
         else {
@@ -403,8 +404,8 @@ void drawTransition(HDC hdc, int N, int i, int j, int nx[], int ny[], int last, 
                 MoveToEx(hdc, nx[j] + (nx[i] - nx[j]) / 2, ny[i] + RADIUS, NULL);
                 LineTo(hdc, nx[j], ny[j]);
                 drawArrow(nx[j] + (nx[i] - nx[j]) / 2, ny[i] + RADIUS, nx[j], ny[j], r, hdc);
-                drawCircle(hdc, nx[j], ny[j], r, "v", RGB(0, 255, 0)); // Активна вершина
-                drawCircle(hdc, nx[i], ny[i], r, "a", RGB(255, 0, 0)); // Закрита вершина
+                drawCircle(hdc, nx[j], ny[j], r, "v", RGB(0, 255, 0));
+                drawCircle(hdc, nx[i], ny[i], r, "a", RGB(255, 0, 0));
             }
             else {
                 MoveToEx(hdc, nx[i], ny[i], NULL);
@@ -412,8 +413,8 @@ void drawTransition(HDC hdc, int N, int i, int j, int nx[], int ny[], int last, 
                 MoveToEx(hdc, nx[j] + (nx[i] - nx[j]) / 2, ny[i] - RADIUS, NULL);
                 LineTo(hdc, nx[j], ny[j]);
                 drawArrow(nx[j] + (nx[i] - nx[j]) / 2, ny[i] - RADIUS, nx[j], ny[j], r, hdc);
-                drawCircle(hdc, nx[j], ny[j], r, "v", RGB(0, 255, 0)); // Активна вершина
-                drawCircle(hdc, nx[i], ny[i], r, "a", RGB(255, 0, 0)); // Закрита вершина
+                drawCircle(hdc, nx[j], ny[j], r, "v", RGB(0, 255, 0));
+                drawCircle(hdc, nx[i], ny[i], r, "a", RGB(255, 0, 0));
             }
         }
     }
@@ -422,18 +423,17 @@ void drawTransition(HDC hdc, int N, int i, int j, int nx[], int ny[], int last, 
         LineTo(hdc, nx[j], ny[j]);
         drawArrow(nx[i], ny[i], nx[j], ny[j], r, hdc);
         MoveToEx(hdc, nx[i], ny[i], NULL);
-        drawCircle(hdc, nx[j], ny[j], r, "v", RGB(0, 255, 0)); // Активна вершина
-        drawCircle(hdc, nx[i], ny[i], r, "a", RGB(255, 0, 0)); // Закрита вершина
+        drawCircle(hdc, nx[j], ny[j], r, "v", RGB(0, 255, 0));
+        drawCircle(hdc, nx[i], ny[i], r, "a", RGB(255, 0, 0));
     }
 
     if (i != last) {
-        for (int g = 0; g < counter; g++) {
-            drawCircle(hdc, nx[visited[g]], ny[visited[g]], r, "c", RGB(0, 0, 255)); // Відвідана вершина
-        }
+
     }
 
+
     if (i != last) {
-        drawCircle(hdc, nx[last], ny[last], r, "c", RGB(0, 0, 255)); // Відвідана вершина
+        drawCircle(hdc, nx[last], ny[last], r, "c", RGB(0, 0, 255));
     }
 
     DeleteObject(hPen);
@@ -464,8 +464,8 @@ void bfs(float** adjacencyMatrix, int numVertices, int startVertex, HWND hdc, in
 
         printf("Visited vertex: %d. Visited from vertex: %d\n", (currentVertex + 1), (fromVertex + 1));
         drawTransition(hdc, numVertices, fromVertex, currentVertex, nx, ny, last, startVertex, counter, queue);
-        last = fromVertex;
 
+        last = fromVertex;
         waitingButtonBFS = true;
 
         while (waitingButtonBFS) {
@@ -482,6 +482,9 @@ void bfs(float** adjacencyMatrix, int numVertices, int startVertex, HWND hdc, in
                 visitedFrom[i] = currentVertex;
             }
         }
+    }
+    for(int i = 0; i < numVertices; i++){
+        drawCircle(hdc, nx[i], ny[i], 16, "c", RGB(0, 0, 255));
     }
 
     free(visited);
@@ -516,7 +519,7 @@ void dfs(float** adjMatrix, int n, int startVertex, HWND hdc, int nx[], int ny[]
             printf("(start vertex)\n");
         }
 
-        //drawTransition(hdc, n, transitionFrom[currentVertex], currentVertex, nx, ny, last, startVertex, counter, visited);
+        drawTransition(hdc, n, transitionFrom[currentVertex], currentVertex, nx, ny, last, startVertex, counter, transitionFrom);
         last = transitionFrom[currentVertex];
 
         waitingButtonDFS = true;
@@ -534,6 +537,9 @@ void dfs(float** adjMatrix, int n, int startVertex, HWND hdc, int nx[], int ny[]
                 transitionFrom[i] = currentVertex;
             }
         }
+    }
+    for(int i = 0; i < n; i++){
+        drawCircle(hdc, nx[i], ny[i], 16, "c", RGB(0, 0, 255));
     }
 
     free(stack);
