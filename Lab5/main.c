@@ -347,8 +347,31 @@ void drawUndirectedGraph(HWND hWnd, HDC hdc, int n, int nx[], int ny[], char** n
     }
 }
 
-void drawCircle(HDC hdc, int x, int y, int radius, char* c, COLORREF color) {
-    HBRUSH hBrush = CreateSolidBrush(color);
+void drawCircle(HDC hdc, int x, int y, int radius, char state, int vertexNumber) {
+    HBRUSH hBrush;
+    COLORREF color;
+    char vertexLabel[10];
+
+    switch (state) {
+        case 'a':
+            color = RGB(255, 0, 0); // Red for active vertices
+            sprintf(vertexLabel, "%d(a)", vertexNumber + 1); // Vertex numbers from 1 to N
+            break;
+        case 'c':
+            color = RGB(0, 0, 255); // Blue for closed vertices
+            sprintf(vertexLabel, "%d(c)", vertexNumber + 1); // Vertex numbers from 1 to N
+            break;
+        case 'v':
+            color = RGB(0, 255, 0);
+            sprintf(vertexLabel, "%d(v)", vertexNumber + 1);
+            break;
+        default:
+            color = RGB(255, 255, 255); // White for other vertices
+            sprintf(vertexLabel, "%d", vertexNumber + 1); // Vertex numbers from 1 to N
+            break;
+    }
+
+    hBrush = CreateSolidBrush(color);
     SelectObject(hdc, hBrush);
 
     int left = x - radius;
@@ -359,7 +382,11 @@ void drawCircle(HDC hdc, int x, int y, int radius, char* c, COLORREF color) {
     Ellipse(hdc, left, top, right, bottom);
     FloodFill(hdc, x, y, color);
 
-    TextOut(hdc, x - radius / 2, y - radius / 4, c, strlen(c));
+    SIZE textSize;
+    GetTextExtentPoint32(hdc, vertexLabel, strlen(vertexLabel), &textSize);
+    int textX = x - textSize.cx / 2;
+    int textY = y - textSize.cy / 2;
+    TextOut(hdc, textX, textY, vertexLabel, strlen(vertexLabel));
     DeleteObject(hBrush);
 }
 
@@ -370,10 +397,9 @@ void drawTransition(HDC hdc, int N, int i, int j, int nx[], int ny[], int last, 
     int lineWidth = 3; // Weight of lines
     HPEN hPen = CreatePen(PS_SOLID, lineWidth, lineColor);
     SelectObject(hdc, hPen);
-    bool visitedI, visitedJ;
 
     if (i != startVertex) {
-        drawCircle(hdc, nx[last], ny[last], r, "v", RGB(255, 255, 255));
+        drawCircle(hdc, nx[last], ny[last], r, 'v', last);
     }
 
     if (((abs(i - j) >= 2 && abs(i - j) <= edgeCeil) || abs(i - j) >= 3 * edgeCeil) && (nx[i] == nx[j] || ny[i] == ny[j])) {
@@ -384,8 +410,8 @@ void drawTransition(HDC hdc, int N, int i, int j, int nx[], int ny[], int last, 
                 MoveToEx(hdc, nx[j] + RADIUS, ny[i] - (ny[i] - ny[j]) / 2, NULL);
                 LineTo(hdc, nx[j], ny[j]);
                 drawArrow(nx[j] + RADIUS, ny[i] - (ny[i] - ny[j]) / 2, nx[j], ny[j], r, hdc);
-                drawCircle(hdc, nx[j], ny[j], r, "v", RGB(0, 255, 0));
-                drawCircle(hdc, nx[i], ny[i], r, "a", RGB(255, 0, 0));
+                drawCircle(hdc, nx[j], ny[j], r, 'v', j);
+                drawCircle(hdc, nx[i], ny[i], r, 'a', i);
             }
             else {
                 MoveToEx(hdc, nx[i], ny[i], NULL);
@@ -393,8 +419,8 @@ void drawTransition(HDC hdc, int N, int i, int j, int nx[], int ny[], int last, 
                 MoveToEx(hdc, nx[j] - RADIUS, ny[i] - (ny[i] - ny[j]) / 2, NULL);
                 LineTo(hdc, nx[j], ny[j]);
                 drawArrow(nx[j] - RADIUS, ny[i] - (ny[i] - ny[j]) / 2, nx[j], ny[j], r, hdc);
-                drawCircle(hdc, nx[j], ny[j], r, "v", RGB(0, 255, 0));
-                drawCircle(hdc, nx[i], ny[i], r, "a", RGB(255, 0, 0));
+                drawCircle(hdc, nx[j], ny[j], r, 'v', j);
+                drawCircle(hdc, nx[i], ny[i], r, 'a', i);
             }
         }
         else {
@@ -404,8 +430,8 @@ void drawTransition(HDC hdc, int N, int i, int j, int nx[], int ny[], int last, 
                 MoveToEx(hdc, nx[j] + (nx[i] - nx[j]) / 2, ny[i] + RADIUS, NULL);
                 LineTo(hdc, nx[j], ny[j]);
                 drawArrow(nx[j] + (nx[i] - nx[j]) / 2, ny[i] + RADIUS, nx[j], ny[j], r, hdc);
-                drawCircle(hdc, nx[j], ny[j], r, "v", RGB(0, 255, 0));
-                drawCircle(hdc, nx[i], ny[i], r, "a", RGB(255, 0, 0));
+                drawCircle(hdc, nx[j], ny[j], r, 'v', j);
+                drawCircle(hdc, nx[i], ny[i], r, 'a', i);
             }
             else {
                 MoveToEx(hdc, nx[i], ny[i], NULL);
@@ -413,8 +439,8 @@ void drawTransition(HDC hdc, int N, int i, int j, int nx[], int ny[], int last, 
                 MoveToEx(hdc, nx[j] + (nx[i] - nx[j]) / 2, ny[i] - RADIUS, NULL);
                 LineTo(hdc, nx[j], ny[j]);
                 drawArrow(nx[j] + (nx[i] - nx[j]) / 2, ny[i] - RADIUS, nx[j], ny[j], r, hdc);
-                drawCircle(hdc, nx[j], ny[j], r, "v", RGB(0, 255, 0));
-                drawCircle(hdc, nx[i], ny[i], r, "a", RGB(255, 0, 0));
+                drawCircle(hdc, nx[j], ny[j], r, 'v', j);
+                drawCircle(hdc, nx[i], ny[i], r, 'a', i);
             }
         }
     }
@@ -423,27 +449,18 @@ void drawTransition(HDC hdc, int N, int i, int j, int nx[], int ny[], int last, 
         LineTo(hdc, nx[j], ny[j]);
         drawArrow(nx[i], ny[i], nx[j], ny[j], r, hdc);
         MoveToEx(hdc, nx[i], ny[i], NULL);
-        drawCircle(hdc, nx[j], ny[j], r, "v", RGB(0, 255, 0));
-        drawCircle(hdc, nx[i], ny[i], r, "a", RGB(255, 0, 0));
+        drawCircle(hdc, nx[j], ny[j], r, 'v', j);
+        drawCircle(hdc, nx[i], ny[i], r, 'a', i);
     }
 
     if (i != last) {
-
-    }
-
-
-    if (i != last) {
-        drawCircle(hdc, nx[last], ny[last], r, "c", RGB(0, 0, 255));
+        drawCircle(hdc, nx[last], ny[last], r, 'c', last);
     }
 
     DeleteObject(hPen);
 }
 
-void bfs(float** adjacencyMatrix, int numVertices, int startVertex, HWND hdc, int nx[], int ny[]) {
-    int* visited = (int*)malloc(numVertices * sizeof(int));
-    for (int i = 0; i < numVertices; i++) {
-        visited[i] = 0;
-    }
+void bfs(float** adjacencyMatrix, int numVertices, int startVertex, HDC hdc, int nx[], int ny[], int* visited) {
 
     int* queue = (int*)malloc(numVertices * sizeof(int));
     int* visitedFrom = (int*)malloc(numVertices * sizeof(int));
@@ -483,22 +500,32 @@ void bfs(float** adjacencyMatrix, int numVertices, int startVertex, HWND hdc, in
             }
         }
     }
+
     for(int i = 0; i < numVertices; i++){
-        drawCircle(hdc, nx[i], ny[i], 16, "c", RGB(0, 0, 255));
+        if(visited[i] == 1){
+            drawCircle(hdc, nx[i], ny[i], 16, "c", i);
+        }
     }
 
-    free(visited);
+    for(int i = 0; i < numVertices; i++){
+        if(visited[i] != 1){
+            bfs(adjacencyMatrix, numVertices, i, hdc, nx, ny, visited);
+        }
+    }
+
     free(queue);
     free(visitedFrom);
 }
 
-void dfs(float** adjMatrix, int n, int startVertex, HWND hdc, int nx[], int ny[]) {
+void dfs(float** adjMatrix, int n, int startVertex, HDC hdc, int nx[], int ny[], int* visited) {
     int* stack = malloc((n * 3) * sizeof(int));
     int top = -1;
     int last = startVertex;
     int counter = 0;
-    int* visited = calloc(n, sizeof(int));
     int* transitionFrom = malloc(n * sizeof(int));
+    for(int i = 0; i < n; i++){
+        transitionFrom[i] = startVertex;
+    }
 
     stack[++top] = startVertex;
 
@@ -538,12 +565,20 @@ void dfs(float** adjMatrix, int n, int startVertex, HWND hdc, int nx[], int ny[]
             }
         }
     }
+
     for(int i = 0; i < n; i++){
-        drawCircle(hdc, nx[i], ny[i], 16, "c", RGB(0, 0, 255));
+        if(visited[i] == 1){
+            drawCircle(hdc, nx[i], ny[i], 16, "c", i);
+        }
+    }
+
+    for(int i = 0; i < n; i++){
+        if(visited[i] != 1){
+            dfs(adjMatrix, n, i, hdc, nx, ny, visited);
+        }
     }
 
     free(stack);
-    free(visited);
     free(transitionFrom);
 }
 
@@ -551,6 +586,11 @@ void dfs(float** adjMatrix, int n, int startVertex, HWND hdc, int nx[], int ny[]
 void mainFunc(int option, HWND hWnd, HDC hdc){
     const int N = 11;//Number of our vertex
     int nx[N], ny[N];
+
+    int* visited = (int*)malloc(N * sizeof(int));
+    for (int i = 0; i < N; i++) {
+        visited[i] = 0;
+    }
 
     arrayX(N, nx);
     arrayY(N, ny);
@@ -563,15 +603,16 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
     switch(option){
         case 1:
             drawGraph(hWnd, hdc, N, nx, ny, nn, A);
-            bfs(A, N, 0, hdc, nx, ny);
+            bfs(A, N, 0, hdc, nx, ny, visited);
             break;
         case 2:
             drawGraph(hWnd, hdc, N, nx, ny, nn, A);
-            dfs(A, N, 0, hdc, nx, ny);
+            dfs(A, N, 0, hdc, nx, ny, visited);
             break;
     }
 
     free(nn);
+    free(visited);
     freeMatrix(T, N);
     freeMatrix(A, N);
     freeMatrix(symA, N);
