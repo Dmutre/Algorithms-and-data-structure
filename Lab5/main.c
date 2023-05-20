@@ -101,6 +101,15 @@ void printMatrix(int N, float** mat){//Print received matrix
     }
 }
 
+void printIntMatrix(int N, int** mat){//Print received matrix
+    for(int i = 0; i < N; i++){
+        for(int j = 0; j < N; j++){
+            printf("%d ", mat[i][j]);
+        }
+        printf("\n");
+    }
+}
+
 void printIntArray(int N, int* array){//Print received int array
     for(int i = 0; i < N; i++){
         printf("%d ", array[i]);
@@ -460,7 +469,7 @@ void drawTransition(HDC hdc, int N, int i, int j, int nx[], int ny[], int last, 
     DeleteObject(hPen);
 }
 
-void bfs(float** adjacencyMatrix, int numVertices, int startVertex, HDC hdc, int nx[], int ny[], int* visited) {
+void bfs(float** adjacencyMatrix, int numVertices, int startVertex, HDC hdc, int nx[], int ny[], int* visited, int** treeMatrix) {
 
     int* queue = (int*)malloc(numVertices * sizeof(int));
     int* visitedFrom = (int*)malloc(numVertices * sizeof(int));
@@ -479,6 +488,7 @@ void bfs(float** adjacencyMatrix, int numVertices, int startVertex, HDC hdc, int
         int currentVertex = queue[front++];
         int fromVertex = visitedFrom[currentVertex];
 
+        treeMatrix[fromVertex][currentVertex] = 1;
         printf("Visited vertex: %d. Visited from vertex: %d\n", (currentVertex + 1), (fromVertex + 1));
         drawTransition(hdc, numVertices, fromVertex, currentVertex, nx, ny, last, startVertex, counter, queue);
 
@@ -503,13 +513,13 @@ void bfs(float** adjacencyMatrix, int numVertices, int startVertex, HDC hdc, int
 
     for(int i = 0; i < numVertices; i++){
         if(visited[i] == 1){
-            drawCircle(hdc, nx[i], ny[i], 16, "c", i);
+            drawCircle(hdc, nx[i], ny[i], 16, 'c', i);
         }
     }
 
     for(int i = 0; i < numVertices; i++){
         if(visited[i] != 1){
-            bfs(adjacencyMatrix, numVertices, i, hdc, nx, ny, visited);
+            bfs(adjacencyMatrix, numVertices, i, hdc, nx, ny, visited, treeMatrix);
         }
     }
 
@@ -517,7 +527,7 @@ void bfs(float** adjacencyMatrix, int numVertices, int startVertex, HDC hdc, int
     free(visitedFrom);
 }
 
-void dfs(float** adjMatrix, int n, int startVertex, HDC hdc, int nx[], int ny[], int* visited) {
+void dfs(float** adjMatrix, int n, int startVertex, HDC hdc, int nx[], int ny[], int* visited, int** treeMatrix) {
     int* stack = malloc((n * 3) * sizeof(int));
     int top = -1;
     int last = startVertex;
@@ -539,6 +549,7 @@ void dfs(float** adjMatrix, int n, int startVertex, HDC hdc, int nx[], int ny[],
 
         visited[currentVertex] = 1;
         printf("Visited: %d ", (1 + currentVertex));
+        treeMatrix[transitionFrom[currentVertex]][currentVertex] = 1;
 
         if (top >= 0) {
             printf("Transition from: %d\n", (1 + transitionFrom[currentVertex]));
@@ -568,13 +579,13 @@ void dfs(float** adjMatrix, int n, int startVertex, HDC hdc, int nx[], int ny[],
 
     for(int i = 0; i < n; i++){
         if(visited[i] == 1){
-            drawCircle(hdc, nx[i], ny[i], 16, "c", i);
+            drawCircle(hdc, nx[i], ny[i], 16, 'c', i);
         }
     }
 
     for(int i = 0; i < n; i++){
         if(visited[i] != 1){
-            dfs(adjMatrix, n, i, hdc, nx, ny, visited);
+            dfs(adjMatrix, n, i, hdc, nx, ny, visited, treeMatrix);
         }
     }
 
@@ -588,8 +599,13 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
     int nx[N], ny[N];
 
     int* visited = (int*)malloc(N * sizeof(int));
+    int** treeMatrix = (int**)malloc(N * sizeof(int*));
     for (int i = 0; i < N; i++) {
         visited[i] = 0;
+        treeMatrix[i] = (int*)malloc(N * sizeof(int));
+        for(int j = 0; j < N; j++){
+            treeMatrix[i][j] = 0;
+        }
     }
 
     arrayX(N, nx);
@@ -603,16 +619,21 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
     switch(option){
         case 1:
             drawGraph(hWnd, hdc, N, nx, ny, nn, A);
-            bfs(A, N, 0, hdc, nx, ny, visited);
+            bfs(A, N, 0, hdc, nx, ny, visited, treeMatrix);
+            printf("\nMatrix of graph tree BFS:\n");
+            printIntMatrix(N, treeMatrix);
             break;
         case 2:
             drawGraph(hWnd, hdc, N, nx, ny, nn, A);
-            dfs(A, N, 0, hdc, nx, ny, visited);
+            dfs(A, N, 0, hdc, nx, ny, visited, treeMatrix);
+            printf("\nMatrix of graph tree DFS:\n");
+            printIntMatrix(N, treeMatrix);
             break;
     }
 
     free(nn);
     free(visited);
+    freeMatrix(treeMatrix, N);
     freeMatrix(T, N);
     freeMatrix(A, N);
     freeMatrix(symA, N);
