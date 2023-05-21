@@ -10,6 +10,7 @@
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 //Declare our buttons
+HWND buttonDraw;
 
 char ProgName[] = "Laboratory work 6";
 
@@ -400,16 +401,16 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
     char** nn = symbolArray(N);
     float** T = randm(N);
     float** A = mulmr(0.66, T, N);//Fill our matrix
-    float** symA = makeSymmetric(A, N);
 
     switch(option){
-
+        case 1:
+            drawGraph(hWnd, hdc, N, nx, ny, nn, A);
+            break;
     }
 
     free(nn);
     freeMatrix(T, N);
     freeMatrix(A, N);
-    freeMatrix(symA, N);
 }
 
 //function that refresh console and our app window from previous action. Also after cleaning call mainFunc() with options
@@ -464,8 +465,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam){
     PAINTSTRUCT ps;
     switch(messg){
         case WM_CREATE:
+            buttonDraw = CreateWindow("BUTTON",
+                                  "Start BFS algorithm",
+                                  WS_VISIBLE | WS_CHILD | WS_BORDER,
+                                  20, 20, 150, 30,
+                                  hWnd, (HMENU) 1, NULL, NULL);
             break;
         case WM_COMMAND:
+            switch(LOWORD(wParam)){
+                case 1:
+                    windowUpdate(hWnd, hdc, ps, 1);
+                    break;
+            }
             break;
         case WM_PAINT:
             UpdateWindow(hWnd);
@@ -478,5 +489,4 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam){
     }
 
     return 0;
-}
 }
