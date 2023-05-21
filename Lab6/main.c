@@ -76,6 +76,21 @@ float** mulmr(float c, float** mat, int n) {//round matrix from randm() to 0 1 m
     return res;
 }
 
+float** makeSymmetric(float** mat, int N){//receive 0 1 matrix A and make it symmetric for 1 (undirected graph)
+    float** arr = (float**)malloc(N * sizeof(float*));
+    for(int i = 0; i < N; i++){
+        arr[i] = (float*)malloc(N * sizeof(float));
+        for(int j = 0; j < N; j++){
+            if(mat[i][j] == 1 || mat[j][i] == 1){
+                arr[i][j] = 1;
+            } else {
+                arr[i][j] = 0;
+            }
+        }
+    }
+    return arr;
+}
+
 char** symbolArray(int N){//return symbol char array of pointer with elements from 1 to N
     char** array = malloc(N * sizeof(char*));
     for(int i = 0; i < N; i++) {
@@ -108,14 +123,6 @@ void printIntArray(int N, int* array){//Print received int array
         printf("%d ", array[i]);
     }
     printf("\n");
-}
-
-int checkForRegularity(int N, int* array){//return 1(true) or 0(false) value about received array of vertex power. If graph is regular- return 1
-    for(int i = 0; i < N; i++){
-        if(array[0] == array[i]) continue;
-        else return 0;
-    }
-    return 1;
 }
 
 void arrayX(int N, int* array){//count X coordinates for graph
@@ -394,23 +401,28 @@ float** multiplyMatricesStraight(float** mat1, float** mat2, int N) {
 void mainFunc(int option, HWND hWnd, HDC hdc){
     const int N = 11;//Number of our vertex
     int nx[N], ny[N];
+    int n1 = 2, n2 = 1, n3 = 1, n4 = 3;
+    float c = 1 - n3*0.01 - n4*0.005 - 0.05;
 
     arrayX(N, nx);
     arrayY(N, ny);
 
     char** nn = symbolArray(N);
     float** T = randm(N);
-    float** A = mulmr(0.66, T, N);//Fill our matrix
+    float** A = mulmr(c, T, N);//Fill our matrix
+    float** symA = makeSymmetric(A, N);
 
     switch(option){
         case 1:
             drawGraph(hWnd, hdc, N, nx, ny, nn, A);
             break;
     }
+    printMatrix(N, symA);
 
     free(nn);
     freeMatrix(T, N);
     freeMatrix(A, N);
+    freeMatrix(symA, N);
 }
 
 //function that refresh console and our app window from previous action. Also after cleaning call mainFunc() with options
