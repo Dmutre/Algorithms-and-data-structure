@@ -490,6 +490,14 @@ void modifyingOfWeightMat(float** Wt, float** C, float** D, int N){
     freeMatrix(addedCD, N);
 }
 
+void makeSymmetricWeigthMat(int N, float** mat){
+    for(int i = 0; i < N; i++){
+        for(int j = 0; j < N; j++){
+            if(mat[i][j] != 0) mat[j][i] = mat[i][j];
+        }
+    }
+}
+
 //main function from which we call all needed function onclick of buttons. Also this function response all of calculations and let hem in argument of functions
 void mainFunc(int option, HWND hWnd, HDC hdc){
     const int N = 11;//Number of our vertex
@@ -511,6 +519,10 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
     float** D = getD(N, B);
 
     modifyingOfWeightMat(Wt, C, D, N);//Let our Wt matrix to the final stage, that we will be working with
+    printMatrix(N, Wt);
+    printf("Wt2:\n");
+    makeSymmetricWeigthMat(N, Wt);
+    printMatrix(N, Wt);
 
     switch(option){
         case 1:
