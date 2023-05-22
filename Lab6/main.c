@@ -91,6 +91,21 @@ float** makeSymmetric(float** mat, int N){//receive 0 1 matrix A and make it sym
     return arr;
 }
 
+float** getBinaryFromMat(int N, float** mat){//Return binary matrix based on mat from argument. If mat[i][j] > 0 => binary[i][j] = 1, else => binary[i][j] = 0
+    float** binary = (float**)malloc(N * sizeof(float*));
+
+    for(int i = 0; i < N; i++){
+        binary[i] = (float*)malloc(N * sizeof(float*));
+        for(int j = 0; j < N; j++){
+            if(mat[i][j] > 0){
+                binary[i][j] = 1;
+            } else binary[i][j] = 0;
+        }
+    }
+
+    return binary;
+}
+
 char** symbolArray(int N){//return symbol char array of pointer with elements from 1 to N
     char** array = malloc(N * sizeof(char*));
     for(int i = 0; i < N; i++) {
@@ -426,9 +441,7 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
     float** A = mulmr(c, T, N);//Fill our matrix
     float** symA = makeSymmetric(A, N);
     float** Wt = getMatrixOfWeigth(N, k, symA, T);
-
-    printMatrix(N, Wt);
-    printMatrix(N, symA);
+    float** B = getBinaryFromMat(N, Wt);
 
     switch(option){
         case 1:
@@ -441,6 +454,7 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
     freeMatrix(A, N);
     freeMatrix(symA, N);
     freeMatrix(Wt, N);
+    freeMatrix(B, N);
 }
 
 //function that refresh console and our app window from previous action. Also after cleaning call mainFunc() with options
