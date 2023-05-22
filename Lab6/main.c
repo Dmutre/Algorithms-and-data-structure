@@ -440,12 +440,62 @@ float** getC(int N, float** Binary){
     return C;
 }
 
+float** getD(int N, float** Binary){
+    float** D = (float**)malloc(N * sizeof(float*));
+
+    for(int i = 0; i < N; i++){
+        D[i] = (float*)malloc(N * sizeof(float));
+        for(int j = 0; j < N; j++){
+            if(Binary[i][j] == Binary[j][i] && Binary[i][j] == 1){
+                D[i][j] = 1;
+            } else D[i][j] = 0;
+        }
+    }
+
+    return D;
+}
+
+float** additionOfMatrix(int N, float** A, float** B){
+    float** result = (float**)malloc(N * sizeof(float*));
+
+    for(int i = 0; i < N; i++){
+        result[i] = (float*)malloc(N * sizeof(float));
+        for(int j = 0; j < N; j++){
+            result[i][j] = A[i][j] + B[i][j];
+        }
+    }
+
+    return result;
+}
+
+void modifyingOfWeightMat(float** Wt, float** C, float** D, int N){
+
+    for(int i = 0; i < N; i++){//making zero value bottom part(including main diagonal)
+        for(int j = 0; j < N; j++){
+            if(i >= j){
+                D[i][j] = 0;
+            }
+        }
+    }
+
+    float** addedCD = additionOfMatrix(N, C, D);
+
+
+    for(int i = 0; i < N; i++){
+        for(int j = 0; j < N; j++){
+            Wt[i][j] *= addedCD[i][j];
+        }
+    }
+
+    freeMatrix(addedCD, N);
+}
+
 //main function from which we call all needed function onclick of buttons. Also this function response all of calculations and let hem in argument of functions
 void mainFunc(int option, HWND hWnd, HDC hdc){
     const int N = 11;//Number of our vertex
     const int n1 = 2, n2 = 1, n3 = 1, n4 = 3;
-    const float c = 1 - n3*0.01 - n4*0.005 - 0.05;
-    const int k = 100;
+    const float c = 1 - n3*0.01 - n4*0.005 - 0.05;//n4 is odd number, so we will use Prima`s algorithm
+    const int k = 100;//Number that we multiply on T to get Wt matrix
     int nx[N], ny[N];
 
     arrayX(N, nx);
@@ -458,10 +508,9 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
     float** Wt = getMatrixOfWeigth(N, k, A, T);
     float** B = getBinaryFromMat(N, Wt);
     float** C = getC(N, B);
+    float** D = getD(N, B);
 
-    printMatrix(N, B);
-    printMatrix(N, Wt);
-    printMatrix(N, C);
+    modifyingOfWeightMat(Wt, C, D, N);//Let our Wt matrix to the final stage, that we will be working with
 
     switch(option){
         case 1:
@@ -476,6 +525,7 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
     freeMatrix(Wt, N);
     freeMatrix(B, N);
     freeMatrix(C, N);
+    freeMatrix(D, N);
 }
 
 //function that refresh console and our app window from previous action. Also after cleaning call mainFunc() with options
