@@ -397,12 +397,26 @@ float** multiplyMatricesStraight(float** mat1, float** mat2, int N) {
     return result;
 }
 
+float** getMatrixOfWeigth(int N, int k, float** A, float** T){
+    float** Wt = (float**)malloc(N * sizeof(float*));
+
+    for(int i = 0; i < N; i++){
+        Wt[i] = (float*)malloc(N * sizeof(float));
+        for(int j = 0; j < N; j++){
+            Wt[i][j] = round(T[i][j] * 100 * A[i][j]);
+        }
+    }
+
+    return Wt;
+}
+
 //main function from which we call all needed function onclick of buttons. Also this function response all of calculations and let hem in argument of functions
 void mainFunc(int option, HWND hWnd, HDC hdc){
     const int N = 11;//Number of our vertex
+    const int n1 = 2, n2 = 1, n3 = 1, n4 = 3;
+    const float c = 1 - n3*0.01 - n4*0.005 - 0.05;
+    const int k = 100;
     int nx[N], ny[N];
-    int n1 = 2, n2 = 1, n3 = 1, n4 = 3;
-    float c = 1 - n3*0.01 - n4*0.005 - 0.05;
 
     arrayX(N, nx);
     arrayY(N, ny);
@@ -411,18 +425,22 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
     float** T = randm(N);
     float** A = mulmr(c, T, N);//Fill our matrix
     float** symA = makeSymmetric(A, N);
+    float** Wt = getMatrixOfWeigth(N, k, symA, T);
+
+    printMatrix(N, Wt);
+    printMatrix(N, symA);
 
     switch(option){
         case 1:
             drawGraph(hWnd, hdc, N, nx, ny, nn, A);
             break;
     }
-    printMatrix(N, symA);
 
     free(nn);
     freeMatrix(T, N);
     freeMatrix(A, N);
     freeMatrix(symA, N);
+    freeMatrix(Wt, N);
 }
 
 //function that refresh console and our app window from previous action. Also after cleaning call mainFunc() with options
