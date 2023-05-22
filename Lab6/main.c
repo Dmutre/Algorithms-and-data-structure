@@ -425,6 +425,21 @@ float** getMatrixOfWeigth(int N, int k, float** A, float** T){
     return Wt;
 }
 
+float** getC(int N, float** Binary){
+    float** C = (float**)malloc(N * sizeof(float*));
+
+    for(int i = 0; i < N; i++){
+        C[i] = (float*)malloc(N * sizeof(float));
+        for(int j = 0; j < N; j++){
+            if(Binary[i][j] != Binary[j][i]){
+                C[i][j] = 1;
+            } else C[i][j] = 0;
+        }
+    }
+
+    return C;
+}
+
 //main function from which we call all needed function onclick of buttons. Also this function response all of calculations and let hem in argument of functions
 void mainFunc(int option, HWND hWnd, HDC hdc){
     const int N = 11;//Number of our vertex
@@ -440,8 +455,13 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
     float** T = randm(N);
     float** A = mulmr(c, T, N);//Fill our matrix
     float** symA = makeSymmetric(A, N);
-    float** Wt = getMatrixOfWeigth(N, k, symA, T);
+    float** Wt = getMatrixOfWeigth(N, k, A, T);
     float** B = getBinaryFromMat(N, Wt);
+    float** C = getC(N, B);
+
+    printMatrix(N, B);
+    printMatrix(N, Wt);
+    printMatrix(N, C);
 
     switch(option){
         case 1:
@@ -455,6 +475,7 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
     freeMatrix(symA, N);
     freeMatrix(Wt, N);
     freeMatrix(B, N);
+    freeMatrix(C, N);
 }
 
 //function that refresh console and our app window from previous action. Also after cleaning call mainFunc() with options
