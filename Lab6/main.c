@@ -4,7 +4,9 @@
 #include <math.h>
 #include<conio.h>
 #include <stdbool.h>
+#include <limits.h>
 #define RADIUS 35
+#define MAX_VERTICES 100
 
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -498,6 +500,78 @@ void makeSymmetricWeigthMat(int N, float** mat){
     }
 }
 
+int findMinKey(float key[], int mstSet[], int vertices){
+    float min = INT_MAX;
+    int minIndex;
+
+    for (int v = 0; v < vertices; v++)
+    {
+        if (mstSet[v] == 0 && key[v] < min)
+        {
+            min = key[v];
+            minIndex = v;
+        }
+    }
+
+    return minIndex;
+}
+
+float** primMST(float** adjacencyMatrix, float** weightMatrix, int vertices){
+    float** resultMatrix = malloc(vertices * sizeof(float*));
+    for (int i = 0; i < vertices; i++) {
+        resultMatrix[i] = malloc(vertices * sizeof(float));
+        memset(resultMatrix[i], 0, vertices * sizeof(float));
+    }
+
+    int parent[MAX_VERTICES]; // To save resent vertices
+    float key[MAX_VERTICES];  // to save weigth of keys
+    int mstSet[MAX_VERTICES]; // to track included vertexes
+
+    for (int i = 0; i < vertices; i++)
+    {
+        key[i] = INT_MAX;
+        mstSet[i] = 0;
+    }
+
+    key[0] = 0;      // Root of our tree (first vertex)
+    parent[0] = -1;  // Origin doesn`t have previous vertex
+
+    // Build main tree
+    for (int count = 0; count < vertices - 1; count++)
+    {
+        int u = findMinKey(key, mstSet, vertices);
+        mstSet[u] = 1;
+
+        for (int v = 0; v < vertices; v++)
+        {
+            if (adjacencyMatrix[u][v] != 0 && mstSet[v] == 0 && weightMatrix[u][v] < key[v])
+            {
+                parent[v] = u;
+                key[v] = weightMatrix[u][v];
+            }
+        }
+    }
+
+    // Build adjacency matrix of our tree
+    for (int i = 1; i < vertices; i++)
+    {
+        resultMatrix[i][parent[i]] = weightMatrix[i][parent[i]];
+        resultMatrix[parent[i]][i] = weightMatrix[parent[i]][i];
+    }
+
+    printf("Adjestic matrix of minimal tree:\n");
+    for (int i = 0; i < vertices; i++)
+    {
+        for (int j = 0; j < vertices; j++)
+        {
+            printf("%.2f\t", resultMatrix[i][j]);
+        }
+        printf("\n");
+    }
+
+    return resultMatrix;
+}
+
 //main function from which we call all needed function onclick of buttons. Also this function response all of calculations and let hem in argument of functions
 void mainFunc(int option, HWND hWnd, HDC hdc){
     const int N = 11;//Number of our vertex
@@ -524,9 +598,13 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
     makeSymmetricWeigthMat(N, Wt);
     printMatrix(N, Wt);
 
+    float** matRe = primMST(symA, Wt, N);
+
+
     switch(option){
         case 1:
-            drawGraph(hWnd, hdc, N, nx, ny, nn, A);
+            drawUnDependenceGraph(hWnd, hdc, N, nn, nx, ny, A);
+
             break;
     }
 
