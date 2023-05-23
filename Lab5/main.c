@@ -523,12 +523,19 @@ void bfs(float** adjacencyMatrix, int numVertices, int startVertex, HDC hdc, int
         }
     }
 
+    printf("\nCorrespondent matrix of vertexes and gotten numeration\n");
+    printf("Start numeration/ gotten numeration from algorithm\n");
+    for(int i = 0; i < numVertices; i++){
+        printf("\t%d / %d \n", (i+1), (queue[i]+1));
+    }
+
     free(queue);
     free(visitedFrom);
 }
 
 void dfs(float** adjMatrix, int n, int startVertex, HDC hdc, int nx[], int ny[], int* visited, int** treeMatrix) {
     int* stack = malloc((n * 3) * sizeof(int));
+    int* queue = malloc(n * sizeof(int));
     int top = -1;
     int last = startVertex;
     int counter = 0;
@@ -553,6 +560,7 @@ void dfs(float** adjMatrix, int n, int startVertex, HDC hdc, int nx[], int ny[],
 
         if (top >= 0) {
             printf("Transition from: %d\n", (1 + transitionFrom[currentVertex]));
+            queue[counter-1] = (currentVertex);
         } else {
             printf("(start vertex)\n");
         }
@@ -574,6 +582,7 @@ void dfs(float** adjMatrix, int n, int startVertex, HDC hdc, int nx[], int ny[],
                 stack[++top] = i;
                 transitionFrom[i] = currentVertex;
             }
+
         }
     }
 
@@ -589,6 +598,14 @@ void dfs(float** adjMatrix, int n, int startVertex, HDC hdc, int nx[], int ny[],
         }
     }
 
+    printf("\nCorrespondent matrix of vertexes and gotten numeration\n");
+    printf("Start numeration/ gotten numeration from algorithm\n");
+    for(int i = 0; i < n; i++){
+        printf("\t%d / %d \n", (i+1), (queue[i]+1));
+    }
+
+
+    free(queue);
     free(stack);
     free(transitionFrom);
 }
