@@ -587,11 +587,13 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
     addEdge(graph, 2, 3);
     addEdge(graph, 6, 8);
     addEdge(graph, 6, 8);
-    //addEdge(graph, 7, 4);
-    //addEdge(graph, 4, 2);
-    //addEdge(graph, 11, 1);
+    addEdge(graph, 7, 4);
+    addEdge(graph, 4, 2);
+    addEdge(graph, 10, 1);
 
     printGraph(graph);
+
+    destroyGraph(graph);
 
     arrayX(N, nx);
     arrayY(N, ny);

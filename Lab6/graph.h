@@ -1,6 +1,7 @@
 #ifndef GRAPH_H_INCLUDED
 #define GRAPH_H_INCLUDED
 #include <stdio.h>
+#include <stdbool.h>
 #include <stdlib.h>
 
 // Структура вузла списку
@@ -28,9 +29,23 @@ Graph* createGraph(int numVertices) {
     return graph;
 }
 
+bool isAdjacent(Graph* graph, int source, int destination) {
+    Node* currentNode = graph->adjacencyList[source];
+    while (currentNode) {
+        if (currentNode->vertex == destination) {
+            return true;
+        }
+        currentNode = currentNode->next;
+    }
+    return false;
+}
+
 // Додавання ребра між вершинами source та destination
 void addEdge(Graph* graph, int source, int destination) {
     // Створюємо новий вузол та заповнюємо його значеннями
+    if (isAdjacent(graph, source, destination))
+        return;
+
     Node* newNode = (Node*)malloc(sizeof(Node));
     newNode->vertex = destination;
     newNode->next = NULL;
