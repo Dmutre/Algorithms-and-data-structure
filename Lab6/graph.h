@@ -111,54 +111,6 @@ int getMinVertex(bool* inMST, float* key, int numVertices) {
     return minVertex;
 }
 
-float** primMST(Graph* graph, float** weights) {
-    int numVertices = graph->numVertices;
-
-    float** mst = (float**)malloc(numVertices * sizeof(float*));
-    for (int i = 0; i < numVertices; i++) {
-        mst[i] = (float*)malloc(numVertices * sizeof(float));
-        for (int j = 0; j < numVertices; j++) {
-            mst[i][j] = 0.0f;
-        }
-    }
-
-    bool* inMST = (bool*)malloc(numVertices * sizeof(bool));
-    float* key = (float*)malloc(numVertices * sizeof(float));
-    int* parent = (int*)malloc(numVertices * sizeof(int));
-
-    for (int v = 0; v < numVertices; v++) {
-        inMST[v] = false;
-        key[v] = INF;
-        parent[v] = -1;
-    }
-
-    key[0] = 0.0f;
-    parent[0] = -1;
-
-    for (int count = 0; count < numVertices - 1; count++) {
-        int u = getMinVertex(inMST, key, numVertices);
-        inMST[u] = true;
-
-        for (int v = 0; v < numVertices; v++) {
-            if (weights[u][v] != 0.0f && !inMST[v] && weights[u][v] < key[v]) {
-                parent[v] = u;
-                key[v] = weights[u][v];
-            }
-        }
-    }
-
-    for (int v = 1; v < numVertices; v++) {
-        mst[parent[v]][v] = weights[parent[v]][v];
-        mst[v][parent[v]] = weights[parent[v]][v];
-    }
-
-    free(inMST);
-    free(key);
-    free(parent);
-
-    return mst;
-}
-
 void destroyGraph(Graph* graph) {
     if (graph) {
         if (graph->adjacencyList) {
