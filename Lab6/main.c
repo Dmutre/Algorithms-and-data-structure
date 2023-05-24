@@ -500,7 +500,7 @@ void makeSymmetricWeigthMat(int N, float** mat){
         }
     }
 }
-
+/*
 int findMinKey(float key[], int mstSet[], int vertices){
     float min = INT_MAX;
     int minIndex;
@@ -572,7 +572,7 @@ float** primMST(float** adjacencyMatrix, float** weightMatrix, int vertices){
 
     return resultMatrix;
 }
-
+*/
 //main function from which we call all needed function onclick of buttons. Also this function response all of calculations and let hem in argument of functions
 void mainFunc(int option, HWND hWnd, HDC hdc){
     const int N = 11;//Number of our vertex
@@ -580,20 +580,6 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
     const float c = 1 - n3*0.01 - n4*0.005 - 0.05;//n4 is odd number, so we will use Prima`s algorithm
     const int k = 100;//Number that we multiply on T to get Wt matrix
     int nx[N], ny[N];
-
-    Graph* graph = createGraph(N);
-
-    addEdge(graph, 1, 2);
-    addEdge(graph, 2, 3);
-    addEdge(graph, 6, 8);
-    addEdge(graph, 6, 8);
-    addEdge(graph, 7, 4);
-    addEdge(graph, 4, 2);
-    addEdge(graph, 10, 1);
-
-    printGraph(graph);
-
-    destroyGraph(graph);
 
     arrayX(N, nx);
     arrayY(N, ny);
@@ -607,13 +593,20 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
     float** C = getC(N, B);
     float** D = getD(N, B);
 
+    Graph* graph = createGraph(N);
+
+    setConnectionsFromMatrix(graph, symA);
+
+    printGraph(graph);
+
     modifyingOfWeightMat(Wt, C, D, N);//Let our Wt matrix to the final stage, that we will be working with
     printMatrix(N, Wt);
     printf("Wt2:\n");
     makeSymmetricWeigthMat(N, Wt);
     printMatrix(N, Wt);
 
-    float** matRe = primMST(symA, Wt, N);
+    float** matRe = primMST(graph, Wt);
+    printMatrix(N, matRe);
 
 
     switch(option){
@@ -631,6 +624,7 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
     freeMatrix(B, N);
     freeMatrix(C, N);
     freeMatrix(D, N);
+    destroyGraph(graph);
 }
 
 //function that refresh console and our app window from previous action. Also after cleaning call mainFunc() with options

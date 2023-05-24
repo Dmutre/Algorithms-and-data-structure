@@ -3,20 +3,20 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <float.h>
 
-// Структура вузла списку
+#define INF FLT_MAX
+
 typedef struct Node {
     int vertex;
     struct Node* next;
 } Node;
 
-// Структура графа
 typedef struct Graph {
     int numVertices;
     Node** adjacencyList;
 } Graph;
 
-// Створення графа з певою кількістю вершин
 Graph* createGraph(int numVertices) {
     Graph* graph = (Graph*)malloc(sizeof(Graph));
     graph->numVertices = numVertices;
@@ -40,17 +40,14 @@ bool isAdjacent(Graph* graph, int source, int destination) {
     return false;
 }
 
-// Додавання ребра між вершинами source та destination
 void addEdge(Graph* graph, int source, int destination) {
-    // Створюємо новий вузол та заповнюємо його значеннями
-    if (isAdjacent(graph, source, destination))
+    if (isAdjacent(graph, source, destination))//to avoid copy dependency that already exist
         return;
 
     Node* newNode = (Node*)malloc(sizeof(Node));
     newNode->vertex = destination;
     newNode->next = NULL;
 
-    // Додаємо новий вузол до списку суміжності вершини source
     if (graph->adjacencyList[source] == NULL) {
         graph->adjacencyList[source] = newNode;
     } else {
@@ -61,12 +58,10 @@ void addEdge(Graph* graph, int source, int destination) {
         temp->next = newNode;
     }
 
-    // Додаємо також ребро в зворотньому напрямку для ненапрямленого графа
     newNode = (Node*)malloc(sizeof(Node));
     newNode->vertex = source;
     newNode->next = NULL;
 
-    // Додаємо новий вузол до списку суміжності вершини destination
     if (graph->adjacencyList[destination] == NULL) {
         graph->adjacencyList[destination] = newNode;
     } else {
@@ -78,20 +73,92 @@ void addEdge(Graph* graph, int source, int destination) {
     }
 }
 
-// Друк графа
+void setConnectionsFromMatrix(Graph* graph, float** adjacencyMatrix) {
+    int numVertices = graph->numVertices;
+
+    for (int i = 0; i < numVertices; i++) {
+        for (int j = i + 1; j < numVertices; j++) {
+            if (adjacencyMatrix[i][j] == 1) {
+                addEdge(graph, i, j);
+            }
+        }
+    }
+}
+
 void printGraph(Graph* graph) {
     for (int i = 0; i < graph->numVertices; i++) {
-        printf("Vertex %d: ", i);
+        printf("Vertex %d: ", (i+1));
         Node* currentNode = graph->adjacencyList[i];
         while (currentNode != NULL) {
-            printf("%d ", currentNode->vertex);
+            printf("%d ", (currentNode->vertex+1));
             currentNode = currentNode->next;
         }
         printf("\n");
     }
 }
 
-// Звільнення пам'яті, виділеної для графа
+int getMinVertex(bool* inMST, float* key, int numVertices) {
+    int minVertex = -1;
+    float minValue = INF;
+
+    for (int v = 0; v < numVertices; v++) {
+        if (!inMST[v] && key[v] < minValue) {
+            minVertex = v;
+            minValue = key[v];
+        }
+    }
+
+    return minVertex;
+}
+
+float** primMST(Graph* graph, float** weights) {
+    int numVertices = graph->numVertices;
+
+    float** mst = (float**)malloc(numVertices * sizeof(float*));
+    for (int i = 0; i < numVertices; i++) {
+        mst[i] = (float*)malloc(numVertices * sizeof(float));
+        for (int j = 0; j < numVertices; j++) {
+            mst[i][j] = 0.0f;
+        }
+    }
+
+    bool* inMST = (bool*)malloc(numVertices * sizeof(bool));
+    float* key = (float*)malloc(numVertices * sizeof(float));
+    int* parent = (int*)malloc(numVertices * sizeof(int));
+
+    for (int v = 0; v < numVertices; v++) {
+        inMST[v] = false;
+        key[v] = INF;
+        parent[v] = -1;
+    }
+
+    key[0] = 0.0f;
+    parent[0] = -1;
+
+    for (int count = 0; count < numVertices - 1; count++) {
+        int u = getMinVertex(inMST, key, numVertices);
+        inMST[u] = true;
+
+        for (int v = 0; v < numVertices; v++) {
+            if (weights[u][v] != 0.0f && !inMST[v] && weights[u][v] < key[v]) {
+                parent[v] = u;
+                key[v] = weights[u][v];
+            }
+        }
+    }
+
+    for (int v = 1; v < numVertices; v++) {
+        mst[parent[v]][v] = weights[parent[v]][v];
+        mst[v][parent[v]] = weights[parent[v]][v];
+    }
+
+    free(inMST);
+    free(key);
+    free(parent);
+
+    return mst;
+}
+
 void destroyGraph(Graph* graph) {
     if (graph) {
         if (graph->adjacencyList) {
