@@ -14,7 +14,7 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 //Declare our buttons
 HWND buttonDraw, buttonNext;
-bool waitingButton = true;
+bool waitingButton = false;
 
 char ProgName[] = "Laboratory work 6";
 
@@ -144,12 +144,65 @@ void SetTextSize(HDC hdc, int fontSize) {
     DeleteObject(hFontOld);
 }
 
+void drawTransition(HDC hdc, int N, int i, int j, int nx[], int ny[]) {
+    int edgeCeil = ceil(N / 4.0);
+    int r = 20;
+    COLORREF lineColor = RGB(0, 255, 0);
+    int lineWidth = 3;
+    HPEN hPen = CreatePen(PS_SOLID, lineWidth, lineColor);
+    SelectObject(hdc, hPen);
+
+    if (((abs(i - j) >= 2 && abs(i - j) <= edgeCeil) || abs(i - j) >= 3 * edgeCeil) && (nx[i] == nx[j] || ny[i] == ny[j])) {
+        if (nx[i] == nx[j]) {
+            if (i > j) {
+                MoveToEx(hdc, nx[i], ny[i], NULL);
+                LineTo(hdc, nx[j] + RADIUS, ny[i] - (ny[i] - ny[j]) / 2);
+                MoveToEx(hdc, nx[j] + RADIUS, ny[i] - (ny[i] - ny[j]) / 2, NULL);
+                LineTo(hdc, nx[j], ny[j]);
+                drawArrow(nx[j] + RADIUS, ny[i] - (ny[i] - ny[j]) / 2, nx[j], ny[j], r, hdc);
+            }
+            else {
+                MoveToEx(hdc, nx[i], ny[i], NULL);
+                LineTo(hdc, nx[j] - RADIUS, ny[i] - (ny[i] - ny[j]) / 2);
+                MoveToEx(hdc, nx[j] - RADIUS, ny[i] - (ny[i] - ny[j]) / 2, NULL);
+                LineTo(hdc, nx[j], ny[j]);
+                drawArrow(nx[j] - RADIUS, ny[i] - (ny[i] - ny[j]) / 2, nx[j], ny[j], r, hdc);
+            }
+        }
+        else {
+            if (i > j) {
+                MoveToEx(hdc, nx[i], ny[i], NULL);
+                LineTo(hdc, nx[j] + (nx[i] - nx[j]) / 2, ny[i] + RADIUS);
+                MoveToEx(hdc, nx[j] + (nx[i] - nx[j]) / 2, ny[i] + RADIUS, NULL);
+                LineTo(hdc, nx[j], ny[j]);
+                drawArrow(nx[j] + (nx[i] - nx[j]) / 2, ny[i] + RADIUS, nx[j], ny[j], r, hdc);
+            }
+            else {
+                MoveToEx(hdc, nx[i], ny[i], NULL);
+                LineTo(hdc, nx[j] + (nx[i] - nx[j]) / 2, ny[i] - RADIUS);
+                MoveToEx(hdc, nx[j] + (nx[i] - nx[j]) / 2, ny[i] - RADIUS, NULL);
+                LineTo(hdc, nx[j], ny[j]);
+                drawArrow(nx[j] + (nx[i] - nx[j]) / 2, ny[i] - RADIUS, nx[j], ny[j], r, hdc);
+            }
+        }
+    }
+    else {
+        MoveToEx(hdc, nx[i], ny[i], NULL);
+        LineTo(hdc, nx[j], ny[j]);
+        drawArrow(nx[i], ny[i], nx[j], ny[j], r, hdc);
+        MoveToEx(hdc, nx[i], ny[i], NULL);
+    }
+
+    DeleteObject(hPen);
+}
+
 void printVisitedVertex(int src, int dest) {
     printf("Visited edge: %d -> %d\n", (src+1), (dest+1));
 }
 
-float** primMST(Graph* graph, float** weights) {
+float** primMST(Graph* graph, float** weights, int nx[], int ny[], HDC hdc) {
     int numVertices = graph->numVertices;
+    float totalWeight = 0.0f;  // Змінна для зберігання суми ваг ребер
 
     float** mst = (float**)malloc(numVertices * sizeof(float*));
     for (int i = 0; i < numVertices; i++) {
@@ -178,6 +231,8 @@ float** primMST(Graph* graph, float** weights) {
 
         if (parent[u] != -1) {
             printVisitedVertex(parent[u], u);
+            drawTransition(hdc, graph->numVertices, parent[u], u, nx, ny);
+            totalWeight += weights[parent[u]][u];  // Додаємо вагу ребра до суми
         }
 
         for (int v = 0; v < numVertices; v++) {
@@ -187,7 +242,6 @@ float** primMST(Graph* graph, float** weights) {
             }
         }
 
-        // Пауза - чекаємо на натискання кнопки
         MSG msg;
         while (waitingButton) {
             GetMessage(&msg, NULL, 0, 0);
@@ -205,6 +259,8 @@ float** primMST(Graph* graph, float** weights) {
     free(inMST);
     free(key);
     free(parent);
+
+    printf("Total weight of edges: %.1f\n", totalWeight);  // Виводимо суму ваг ребер
 
     return mst;
 }
@@ -521,7 +577,7 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
             break;
     }
 
-    float** matRe = primMST(graph, Wt);
+    float** matRe = primMST(graph, Wt, nx, ny, hdc);
     printMatrix(N, matRe);
 
     free(nn);
