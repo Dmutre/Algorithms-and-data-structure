@@ -5,7 +5,7 @@
 #include<conio.h>
 #include <stdbool.h>
 #include <limits.h>
-#include "struct.c"
+#include "graph.h"
 #define RADIUS 35
 #define MAX_VERTICES 100
 
@@ -183,47 +183,6 @@ void arrayY(int N, int* array){//count Y coordinates for graph
 
     for(int i = edgeCeil*3+1; i < edgeCeil*4 && i < N; i++){
         array[i] = array[i-1]-100;
-    }
-}
-
-void initializeGraph(Graph* graph, int numVertices) {
-    graph->numVertices = numVertices;
-
-    for (int i = 0; i < numVertices; i++) {
-        for (int j = 0; j < numVertices; j++) {
-            graph->adjacencyMatrix[i][j] = 0;
-        }
-    }
-}
-
-void addEdge(Graph* graph, int source, int destination) {
-    if (source >= 0 && source < graph->numVertices && destination >= 0 && destination < graph->numVertices) {
-        graph->adjacencyMatrix[source][destination] = 1;
-        graph->adjacencyMatrix[destination][source] = 1;
-    }
-}
-
-void removeEdge(Graph* graph, int source, int destination) {
-    if (source >= 0 && source < graph->numVertices && destination >= 0 && destination < graph->numVertices) {
-        graph->adjacencyMatrix[source][destination] = 0;
-        graph->adjacencyMatrix[destination][source] = 0;
-    }
-}
-
-int isAdjacent(Graph* graph, int source, int destination) {
-    if (source >= 0 && source < graph->numVertices && destination >= 0 && destination < graph->numVertices) {
-        return graph->adjacencyMatrix[source][destination];
-    }
-
-    return 0;
-}
-
-void printGraph(Graph* graph) {
-    for (int i = 0; i < graph->numVertices; i++) {
-        for (int j = 0; j < graph->numVertices; j++) {
-            printf("%d ", graph->adjacencyMatrix[i][j]);
-        }
-        printf("\n");
     }
 }
 
@@ -622,18 +581,17 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
     const int k = 100;//Number that we multiply on T to get Wt matrix
     int nx[N], ny[N];
 
-    Graph graph;
+    Graph* graph = createGraph(N);
 
-    initializeGraph(&graph, N);
+    addEdge(graph, 1, 2);
+    addEdge(graph, 2, 3);
+    addEdge(graph, 6, 8);
+    addEdge(graph, 6, 8);
+    //addEdge(graph, 7, 4);
+    //addEdge(graph, 4, 2);
+    //addEdge(graph, 11, 1);
 
-    addEdge(&graph, 0, 1);
-    addEdge(&graph, 1, 2);
-    addEdge(&graph, 2, 3);
-    addEdge(&graph, 3, 4);
-    addEdge(&graph, 4, 0);
-
-    printf("Graph:\n");
-    printGraph(&graph);
+    printGraph(graph);
 
     arrayX(N, nx);
     arrayY(N, ny);
