@@ -6,14 +6,14 @@
 #include <stdbool.h>
 #include <limits.h>
 #include "graph.h"
-#define RADIUS 35
+#define RADIUS 40
 #define MAX_VERTICES 100
 
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 //Declare our buttons
-HWND buttonDraw;
+HWND buttonDraw, buttonNext;
 
 char ProgName[] = "Laboratory work 6";
 
@@ -94,6 +94,25 @@ float** makeSymmetric(float** mat, int N){//receive 0 1 matrix A and make it sym
     return arr;
 }
 
+int GetTextSize(HDC hdc) {
+    LOGFONT lf;
+    HFONT hFont, hFontOld;
+    TEXTMETRIC tm;
+    int fontSize = 0;
+
+    hFont = (HFONT)GetCurrentObject(hdc, OBJ_FONT);
+    GetObject(hFont, sizeof(LOGFONT), &lf);
+
+    hFontOld = (HFONT)SelectObject(hdc, hFont);
+    GetTextMetrics(hdc, &tm);
+
+    fontSize = tm.tmHeight;
+
+    SelectObject(hdc, hFontOld);
+
+    return fontSize;
+}
+
 float** getBinaryFromMat(int N, float** mat){//Return binary matrix based on mat from argument. If mat[i][j] > 0 => binary[i][j] = 1, else => binary[i][j] = 0
     float** binary = (float**)malloc(N * sizeof(float*));
 
@@ -107,6 +126,21 @@ float** getBinaryFromMat(int N, float** mat){//Return binary matrix based on mat
     }
 
     return binary;
+}
+
+void SetTextSize(HDC hdc, int fontSize) {
+    LOGFONT lf;
+    HFONT hFont, hFontOld;
+
+    hFont = (HFONT)GetCurrentObject(hdc, OBJ_FONT);
+    GetObject(hFont, sizeof(LOGFONT), &lf);
+
+    lf.lfHeight = -MulDiv(fontSize, GetDeviceCaps(hdc, LOGPIXELSY), 72);
+
+    hFont = CreateFontIndirect(&lf);
+    hFontOld = (HFONT)SelectObject(hdc, hFont);
+
+    DeleteObject(hFontOld);
 }
 
 char** symbolArray(int N){//return symbol char array of pointer with elements from 1 to N
@@ -146,10 +180,10 @@ void printIntArray(int N, int* array){//Print received int array
 void arrayX(int N, int* array){//count X coordinates for graph
     float edge = N / 4.0;
     int edgeCeil = ceil(edge);
-    int stepRigth = 400;//step to go away from left border of window, to let space for buttons
+    int stepRigth = 200;//step to go away from left border of window, to let space for buttons
 
     for(int i = 0; i < edgeCeil+1; i++){
-        array[i] = 100 + 100*i + stepRigth;
+        array[i] = 100 + 150*i + stepRigth;
     }
 
     for(int i = edgeCeil+1; i < edgeCeil*2+1; i++){
@@ -157,7 +191,7 @@ void arrayX(int N, int* array){//count X coordinates for graph
     }
 
     for(int i = edgeCeil*2+1; i < edgeCeil*3+1; i++){
-        array[i] = array[i-1]-100;
+        array[i] = array[i-1]-150;
     }
 
     for(int i = edgeCeil*3+1; i < edgeCeil*4 && i < N; i++){
@@ -174,7 +208,7 @@ void arrayY(int N, int* array){//count Y coordinates for graph
     }
 
     for(int i = edgeCeil+1; i < edgeCeil*2+1; i++){
-        array[i] = array[i-1]+100;
+        array[i] = array[i-1]+150;
     }
 
     for(int i = edgeCeil*2+1; i < edgeCeil*3+1; i++){
@@ -182,15 +216,32 @@ void arrayY(int N, int* array){//count Y coordinates for graph
     }
 
     for(int i = edgeCeil*3+1; i < edgeCeil*4 && i < N; i++){
-        array[i] = array[i-1]-100;
+        array[i] = array[i-1]-150;
     }
 }
 
+void printWeight(HDC hdc, float x, float y, float weight) {
+    int prevFontSize = GetTextSize(hdc);
+
+    SetTextSize(hdc, prevFontSize - 2);
+
+    SetTextColor(hdc, RGB(255, 0, 0));
+
+    char buffer[256];
+    sprintf_s(buffer, sizeof(buffer), "%.1f", weight);
+    TextOut(hdc, x, y, buffer, strlen(buffer));
+
+    SetTextSize(hdc, prevFontSize);
+
+    SetTextColor(hdc, RGB(0, 0, 0));
+}
+
 //from received matrix of dependencies, coordinates, names and number of vertex draw undirected graph
-void drawUnDependenceGraph(HWND hWnd, HDC hdc, int n, char** nn, int nx[], int ny[], float** A){
+void drawUnDependenceGraph(HWND hWnd, HDC hdc, int n, char** nn, int nx[], int ny[], float** A, float** Wt){
     int edgeCeil = ceil(n / 4.0);//Number of vertex, that we can draw four time to get squer
-    int dx = 16, dy = 16, dtx = 5;
-    HPEN KPen = CreatePen(PS_SOLID, 1, RGB(20, 20, 5));
+    int dx = 20, dy = 20, dtx = 5;
+    int changeX, changeY;
+    HPEN KPen = CreatePen(PS_SOLID, 2, RGB(20, 20, 5));
     SelectObject(hdc, KPen);
 
     printf("Undirected A matrix:\n");//Output our matrix of dependencies
@@ -230,15 +281,19 @@ void drawUnDependenceGraph(HWND hWnd, HDC hdc, int n, char** nn, int nx[], int n
         for(int j = 0; j < n; j++){
             if(A[i][j] == 1 && ((abs(i-j) >=2 && abs(i-j) <= edgeCeil) || abs(i-j) >= 3*edgeCeil) && (nx[i] == nx[j] || ny[i] == ny[j])){
                 if(nx[i] == nx[j]){
+                    changeX = nx[j]+RADIUS-20;
+                    changeY = ny[i]-(ny[i]-ny[j])/2;
                     MoveToEx(hdc, nx[i], ny[i], NULL);
                     LineTo(hdc, nx[j]+RADIUS, ny[i]-(ny[i]-ny[j])/2);
                     MoveToEx(hdc, nx[j]+RADIUS, ny[i]-(ny[i]-ny[j])/2, NULL);
                     LineTo(hdc, nx[j], ny[j]);
+                    printWeight(hdc, changeX, changeY, Wt[i][j]);
                 } else{
                     MoveToEx(hdc, nx[i], ny[i], NULL);
                     LineTo(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-RADIUS);
                     MoveToEx(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-RADIUS, NULL);
                     LineTo(hdc, nx[j], ny[j]);
+                    printWeight(hdc, nx[j]+(nx[i]-nx[j])/2-20, ny[i]-RADIUS-10, Wt[i][j]);
                 }
             }
         }
@@ -248,8 +303,11 @@ void drawUnDependenceGraph(HWND hWnd, HDC hdc, int n, char** nn, int nx[], int n
         for(int j = 0; j < n; j++){
             if(A[i][j] == 1){
                 if(!(((abs(i-j) >=2 && abs(i-j) <= edgeCeil) || abs(i-j) >= 3*edgeCeil) && (nx[i] == nx[j] || ny[i] == ny[j])) && i != j){
+                    changeX = (nx[i] + nx[j])/2;
+                    changeY = (ny[i] + ny[j])/2;
                     MoveToEx(hdc, nx[i], ny[i], NULL);
                     LineTo(hdc, nx[j], ny[j]);
+                    printWeight(hdc, changeX, changeY, Wt[i][j]);
                 }
             }
         }
@@ -264,155 +322,12 @@ void drawUnDependenceGraph(HWND hWnd, HDC hdc, int n, char** nn, int nx[], int n
     }
 }
 
-//from received matrix of dependencies, coordinates, names and number of vertex draw directed graph
-void drawGraph(HWND hWnd, HDC hdc, int N, int nx[], int ny[], char** nn, float** A){
-    int edgeCeil = ceil(N / 4.0);//Number of vertex, that we can draw four time to get squer
-    int dx = 16, dy = 16, dtx = 5;
-
-    printf("Adjacency matrix:\n");//Output our matrix of dependencies
-    for(int i = 0; i < N; i++){
-        for(int j = 0; j < N; j++){
-            printf("%.0f ", A[i][j]);
-        }
-        printf("\n");
-    }
-
-    for(int i = 0; i < N; i++){//For ellipses
-        for(int j = 0; j < N; j++){
-            if(A[i][j] == 1){
-                if(i == j){
-                    int dir = (int) ceil((i+1)/(float) edgeCeil);
-                    if(dir%2 == 0){
-                        if(dir > edgeCeil){
-                            Ellipse(hdc, nx[i]-40, ny[i]-20, nx[i], ny[i]+20);
-                            drawArrow(nx[i]-RADIUS, ny[i]+50, nx[j], ny[j], dx, hdc);
-                        } else{
-                            Ellipse(hdc, nx[i]+40, ny[i]-20, nx[i], ny[i]+20);
-                            drawArrow(nx[i]+RADIUS, ny[i]-50, nx[j], ny[j], dx, hdc);
-                        }
-                    } else{
-                        if(dir >= edgeCeil){
-                            Ellipse(hdc, nx[i]-20, ny[i]+40, nx[i]+20, ny[i]);
-                            drawArrow(nx[i]+70, ny[i]+45, nx[j], ny[j], dx, hdc);
-                        } else{
-                            Ellipse(hdc, nx[i]-20, ny[i]-40, nx[i]+20, ny[i]);
-                            drawArrow(nx[i]-70, ny[i]-45, nx[j], ny[j], dx, hdc);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    for(int i = 0; i < N; i++){//For lines when circles are on the same row in X or Y
-        for(int j = 0; j < N; j++){
-            if(A[i][j] == 1 && ((abs(i-j) >=2 && abs(i-j) <= edgeCeil) || abs(i-j) >= 3*edgeCeil) && (nx[i] == nx[j] || ny[i] == ny[j])){
-                if(nx[i] == nx[j]){
-                    if(i > j){
-                        MoveToEx(hdc, nx[i], ny[i], NULL);
-                        LineTo(hdc, nx[j]+RADIUS, ny[i]-(ny[i]-ny[j])/2);
-                        MoveToEx(hdc, nx[j]+RADIUS, ny[i]-(ny[i]-ny[j])/2, NULL);
-                        LineTo(hdc, nx[j], ny[j]);
-                        drawArrow(nx[j]+RADIUS, ny[i]-(ny[i]-ny[j])/2, nx[j], ny[j], dx, hdc);
-                    } else{
-                        MoveToEx(hdc, nx[i], ny[i], NULL);
-                        LineTo(hdc, nx[j]-RADIUS, ny[i]-(ny[i]-ny[j])/2);
-                        MoveToEx(hdc, nx[j]-RADIUS, ny[i]-(ny[i]-ny[j])/2, NULL);
-                        LineTo(hdc, nx[j], ny[j]);
-                        drawArrow(nx[j]-RADIUS, ny[i]-(ny[i]-ny[j])/2, nx[j], ny[j], dx, hdc);
-                    }
-                } else{
-                    if(i > j){
-                        MoveToEx(hdc, nx[i], ny[i], NULL);
-                        LineTo(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]+RADIUS);
-                        MoveToEx(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]+RADIUS, NULL);
-                        LineTo(hdc, nx[j], ny[j]);
-                        drawArrow(nx[j]+(nx[i]-nx[j])/2, ny[i]+RADIUS, nx[j], ny[j], dx, hdc);
-
-                    } else{
-                        MoveToEx(hdc, nx[i], ny[i], NULL);
-                        LineTo(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-RADIUS);
-                        MoveToEx(hdc, nx[j]+(nx[i]-nx[j])/2, ny[i]-RADIUS, NULL);
-                        LineTo(hdc, nx[j], ny[j]);
-                        drawArrow(nx[j]+(nx[i]-nx[j])/2, ny[i]-RADIUS, nx[j], ny[j], dx, hdc);
-                    }
-                }
-            }
-        }
-    }
-
-    int atall = 0;
-    for(int i = 0; i < N; i++){
-        for(int j = 0; j < N; j++){
-            if(A[i][j] == 1){
-                atall++;
-                if(i == j){
-                } else if(((abs(i-j) >=2 && abs(i-j) <= edgeCeil) || abs(i-j) >= 3*edgeCeil) && (nx[i] == nx[j] || ny[i] == ny[j])){
-                } else{
-                    if(i > j && A[j][i] == 1){
-                        MoveToEx(hdc, nx[i], ny[i], NULL);
-                        LineTo(hdc, (nx[i]+nx[j])/2, (ny[i]+ny[j])/2+20);
-                        MoveToEx(hdc, (nx[i]+nx[j])/2, (ny[i]+ny[j])/2+20, NULL);
-                        LineTo(hdc, nx[j], ny[j]);
-                        drawArrow((nx[i]+nx[j])/2, (ny[i]+ny[j])/2+20, nx[j], ny[j], dx, hdc);
-                    } else if(ny[i] == ny[j]){
-                        MoveToEx(hdc, nx[i], ny[i], NULL);
-                        LineTo(hdc, (nx[i]+nx[j])/2+20, (ny[i]+ny[j])/2);
-                        MoveToEx(hdc, (nx[i]+nx[j])/2+20, (ny[i]+ny[j])/2, NULL);
-                        LineTo(hdc, nx[j], ny[j]);
-                        drawArrow((nx[i]+nx[j])/2+20, (ny[i]+ny[j])/2, nx[j], ny[j], dx, hdc);
-                    } else{
-                        MoveToEx(hdc, nx[i], ny[i], NULL);
-                        LineTo(hdc, nx[j], ny[j]);
-                        drawArrow(nx[i], ny[i], nx[j], ny[j], dx, hdc);
-                    }
-                }
-            }
-        }
-    }
-
-    printf("Number of all dependences: %d\n", atall);
-
-    HPEN BPen = CreatePen(PS_SOLID, 2, RGB(50, 0, 255));
-    HPEN KPen = CreatePen(PS_SOLID, 1, RGB(20, 20, 5));
-
-    SelectObject(hdc, BPen);
-    for(int i = 0;i < N; i++){
-        Ellipse(hdc, nx[i]-dx,ny[i]-dy,nx[i]+dx,ny[i]+dy);
-        TextOut(hdc, nx[i]-dtx,ny[i]-dy/2, nn[i],2);
-    }
-}
-
 void makeBinaryMatrix(float** mat, int N){
     for(int i = 0; i < N; i++){
         for(int j = 0; j < N; j++){
             if(mat[i][j] >= 1) mat[i][j] = 1;
         }
     }
-}
-
-float** transposeMatrix(float** matrix, int rows, int columns) {
-    float** result = (float**)malloc(columns * sizeof(float*));
-    for (int i = 0; i < columns; i++) {
-        result[i] = (float*)malloc(rows * sizeof(float));
-        for (int j = 0; j < rows; j++) {
-            result[i][j] = matrix[j][i];
-        }
-    }
-    return result;
-}
-
-float** multiplyMatricesStraight(float** mat1, float** mat2, int N) {
-    float** result = (float**)malloc(N * sizeof(float*));
-
-    for (int i = 0; i < N; i++) {
-        result[i] = (float*)malloc(N * sizeof(float));
-        for (int j = 0; j < N; j++) {
-            result[i][j] = mat1[i][j] * mat2[i][j];
-        }
-    }
-
-    return result;
 }
 
 float** getMatrixOfWeigth(int N, int k, float** A, float** T){
@@ -500,79 +415,7 @@ void makeSymmetricWeigthMat(int N, float** mat){
         }
     }
 }
-/*
-int findMinKey(float key[], int mstSet[], int vertices){
-    float min = INT_MAX;
-    int minIndex;
 
-    for (int v = 0; v < vertices; v++)
-    {
-        if (mstSet[v] == 0 && key[v] < min)
-        {
-            min = key[v];
-            minIndex = v;
-        }
-    }
-
-    return minIndex;
-}
-
-float** primMST(float** adjacencyMatrix, float** weightMatrix, int vertices){
-    float** resultMatrix = malloc(vertices * sizeof(float*));
-    for (int i = 0; i < vertices; i++) {
-        resultMatrix[i] = malloc(vertices * sizeof(float));
-        memset(resultMatrix[i], 0, vertices * sizeof(float));
-    }
-
-    int parent[MAX_VERTICES]; // To save resent vertices
-    float key[MAX_VERTICES];  // to save weigth of keys
-    int mstSet[MAX_VERTICES]; // to track included vertexes
-
-    for (int i = 0; i < vertices; i++)
-    {
-        key[i] = INT_MAX;
-        mstSet[i] = 0;
-    }
-
-    key[0] = 0;      // Root of our tree (first vertex)
-    parent[0] = -1;  // Origin doesn`t have previous vertex
-
-    // Build main tree
-    for (int count = 0; count < vertices - 1; count++)
-    {
-        int u = findMinKey(key, mstSet, vertices);
-        mstSet[u] = 1;
-
-        for (int v = 0; v < vertices; v++)
-        {
-            if (adjacencyMatrix[u][v] != 0 && mstSet[v] == 0 && weightMatrix[u][v] < key[v])
-            {
-                parent[v] = u;
-                key[v] = weightMatrix[u][v];
-            }
-        }
-    }
-
-    // Build adjacency matrix of our tree
-    for (int i = 1; i < vertices; i++)
-    {
-        resultMatrix[i][parent[i]] = weightMatrix[i][parent[i]];
-        resultMatrix[parent[i]][i] = weightMatrix[parent[i]][i];
-    }
-
-    printf("Adjestic matrix of minimal tree:\n");
-    for (int i = 0; i < vertices; i++)
-    {
-        for (int j = 0; j < vertices; j++)
-        {
-            printf("%.2f\t", resultMatrix[i][j]);
-        }
-        printf("\n");
-    }
-
-    return resultMatrix;
-}
-*/
 //main function from which we call all needed function onclick of buttons. Also this function response all of calculations and let hem in argument of functions
 void mainFunc(int option, HWND hWnd, HDC hdc){
     const int N = 11;//Number of our vertex
@@ -611,7 +454,7 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
 
     switch(option){
         case 1:
-            drawUnDependenceGraph(hWnd, hdc, N, nn, nx, ny, A);
+            drawUnDependenceGraph(hWnd, hdc, N, nn, nx, ny, A, Wt);
 
             break;
     }
@@ -683,6 +526,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam){
                                   "Start BFS algorithm",
                                   WS_VISIBLE | WS_CHILD | WS_BORDER,
                                   20, 20, 150, 30,
+                                  hWnd, (HMENU) 1, NULL, NULL);
+            buttonNext = CreateWindow("BUTTON",
+                                  "Next step",
+                                  WS_VISIBLE | WS_CHILD | WS_BORDER,
+                                  170, 20, 150, 30,
                                   hWnd, (HMENU) 1, NULL, NULL);
             break;
         case WM_COMMAND:

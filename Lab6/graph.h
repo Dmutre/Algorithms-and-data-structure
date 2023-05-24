@@ -176,4 +176,4 @@ void destroyGraph(Graph* graph) {
     }
 }
 
-#endif // GRAPH_H_INCLUDED
+#endif
