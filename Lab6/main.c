@@ -174,15 +174,12 @@ void drawTransition(HDC hdc, int N, int i, int j, int nx[], int ny[]) {
                 MoveToEx(hdc, nx[i], ny[i], NULL);
                 LineTo(hdc, nx[j] + RADIUS, ny[i] - (ny[i] - ny[j]) / 2);
                 MoveToEx(hdc, nx[j] + RADIUS, ny[i] - (ny[i] - ny[j]) / 2, NULL);
-                LineTo(hdc, nx[j], ny[j]);
-                drawArrow(nx[j] + RADIUS, ny[i] - (ny[i] - ny[j]) / 2, nx[j], ny[j], r, hdc);
-            }
+                LineTo(hdc, nx[j], ny[j]);            }
             else {
                 MoveToEx(hdc, nx[i], ny[i], NULL);
                 LineTo(hdc, nx[j] - RADIUS, ny[i] - (ny[i] - ny[j]) / 2);
                 MoveToEx(hdc, nx[j] - RADIUS, ny[i] - (ny[i] - ny[j]) / 2, NULL);
                 LineTo(hdc, nx[j], ny[j]);
-                drawArrow(nx[j] - RADIUS, ny[i] - (ny[i] - ny[j]) / 2, nx[j], ny[j], r, hdc);
             }
         }
         else {
@@ -191,21 +188,18 @@ void drawTransition(HDC hdc, int N, int i, int j, int nx[], int ny[]) {
                 LineTo(hdc, nx[j] + (nx[i] - nx[j]) / 2, ny[i] + RADIUS);
                 MoveToEx(hdc, nx[j] + (nx[i] - nx[j]) / 2, ny[i] + RADIUS, NULL);
                 LineTo(hdc, nx[j], ny[j]);
-                drawArrow(nx[j] + (nx[i] - nx[j]) / 2, ny[i] + RADIUS, nx[j], ny[j], r, hdc);
             }
             else {
                 MoveToEx(hdc, nx[i], ny[i], NULL);
                 LineTo(hdc, nx[j] + (nx[i] - nx[j]) / 2, ny[i] - RADIUS);
                 MoveToEx(hdc, nx[j] + (nx[i] - nx[j]) / 2, ny[i] - RADIUS, NULL);
                 LineTo(hdc, nx[j], ny[j]);
-                drawArrow(nx[j] + (nx[i] - nx[j]) / 2, ny[i] - RADIUS, nx[j], ny[j], r, hdc);
             }
         }
     }
     else {
         MoveToEx(hdc, nx[i], ny[i], NULL);
         LineTo(hdc, nx[j], ny[j]);
-        drawArrow(nx[i], ny[i], nx[j], ny[j], r, hdc);
         MoveToEx(hdc, nx[i], ny[i], NULL);
     }
 
