@@ -196,11 +196,18 @@ void drawTransition(HDC hdc, int N, int i, int j, int nx[], int ny[]) {
     DeleteObject(hPen);
 }
 
+void drawCircle(HDC hdc, int nx[], int ny[], int i, char** nn){
+    int dx = 20, dy = 20, dtx = 5;
+
+    Ellipse(hdc, nx[i]-dx,ny[i]-dy,nx[i]+dx,ny[i]+dy);
+    TextOut(hdc, nx[i]-dtx,ny[i]-dy/2, nn[i],2);
+}
+
 void printVisitedVertex(int src, int dest) {
     printf("Visited edge: %d -> %d\n", (src+1), (dest+1));
 }
 
-float** primMST(Graph* graph, float** weights, int nx[], int ny[], HDC hdc) {
+float** primMST(Graph* graph, float** weights, int nx[], int ny[], char** nn, HDC hdc) {
     int numVertices = graph->numVertices;
     float totalWeight = 0.0f;  // Змінна для зберігання суми ваг ребер
 
@@ -232,6 +239,8 @@ float** primMST(Graph* graph, float** weights, int nx[], int ny[], HDC hdc) {
         if (parent[u] != -1) {
             printVisitedVertex(parent[u], u);
             drawTransition(hdc, graph->numVertices, parent[u], u, nx, ny);
+            drawCircle(hdc, nx, ny, parent[u], nn);
+            drawCircle(hdc, nx, ny, u, nn);
             totalWeight += weights[parent[u]][u];  // Додаємо вагу ребра до суми
         }
 
@@ -577,7 +586,7 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
             break;
     }
 
-    float** matRe = primMST(graph, Wt, nx, ny, hdc);
+    float** matRe = primMST(graph, Wt, nx, ny, nn, hdc);
     printMatrix(N, matRe);
 
     free(nn);
@@ -644,14 +653,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam){
     switch(messg){
         case WM_CREATE:
             buttonDraw = CreateWindow("BUTTON",
-                                  "Start BFS algorithm",
+                                  "Start Prima`s algorithm",
                                   WS_VISIBLE | WS_CHILD | WS_BORDER,
-                                  20, 20, 150, 30,
+                                  20, 20, 180, 30,
                                   hWnd, (HMENU) 1, NULL, NULL);
             buttonNext = CreateWindow("BUTTON",
                                   "Next step",
                                   WS_VISIBLE | WS_CHILD | WS_BORDER,
-                                  170, 20, 150, 30,
+                                  200, 20, 150, 30,
                                   hWnd, (HMENU) 2, NULL, NULL);
             break;
         case WM_COMMAND:
