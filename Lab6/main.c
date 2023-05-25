@@ -160,6 +160,22 @@ void printWeight(HDC hdc, float x, float y, float weight) {
     SetTextColor(hdc, RGB(0, 0, 0));
 }
 
+void printWeightBlue(HDC hdc, float x, float y, float weight) {
+    int prevFontSize = GetTextSize(hdc);
+
+    SetTextSize(hdc, prevFontSize - 2);
+
+    SetTextColor(hdc, RGB(0, 0, 255)); // Синій колір тексту
+
+    char buffer[256];
+    sprintf_s(buffer, sizeof(buffer), "%.1f", weight);
+    TextOut(hdc, x, y, buffer, strlen(buffer));
+
+    SetTextSize(hdc, prevFontSize);
+
+    SetTextColor(hdc, RGB(0, 0, 0)); // Чорний колір тексту
+}
+
 void drawTransition(HDC hdc, int N, int i, int j, int nx[], int ny[]) {
     int edgeCeil = ceil(N / 4.0);
     int r = 20;
@@ -223,20 +239,20 @@ void drawWeight(HDC hdc, float** Wt, int nx[], int ny[], int i, int j, int N){
             changeY = ny[i]-(ny[i]-ny[j])/2;
             printWeight(hdc, changeX, changeY, Wt[i][j]);
         } else{
-            printWeight(hdc, nx[j]+(nx[i]-nx[j])/2-20, ny[i]-RADIUS-10, Wt[i][j]);
+            printWeightBlue(hdc, nx[j]+(nx[i]-nx[j])/2-20, ny[i]-RADIUS-10, Wt[i][j]);
         }
     }
 
     if(!(((abs(i-j) >=2 && abs(i-j) <= edgeCeil) || abs(i-j) >= 3*edgeCeil) && (nx[i] == nx[j] || ny[i] == ny[j])) && i != j){
         changeX = (nx[i] + nx[j])/2;
         changeY = (ny[i] + ny[j])/2;
-        printWeight(hdc, changeX, changeY, Wt[i][j]);
+        printWeightBlue(hdc, changeX, changeY, Wt[i][j]);
     }
 
 }
 
-void printVisitedVertex(int src, int dest) {
-    printf("Visited edge: %d -> %d\n", (src+1), (dest+1));
+void printVisitedVertex(int src, int dest, float weight) {
+    printf("Visited edge: %d -> %d, weight: %.1f\n", (src+1), (dest+1), weight);
 }
 
 float** primMST(Graph* graph, float** weights, int nx[], int ny[], char** nn, HDC hdc) {
@@ -269,7 +285,7 @@ float** primMST(Graph* graph, float** weights, int nx[], int ny[], char** nn, HD
         inMST[u] = true;
 
         if (parent[u] != -1) {
-            printVisitedVertex(parent[u], u);
+            printVisitedVertex(parent[u], u, weights[parent[u]][u]);
             drawTransition(hdc, graph->numVertices, parent[u], u, nx, ny);
             drawCircle(hdc, nx, ny, parent[u], nn);
             drawCircle(hdc, nx, ny, u, nn);
@@ -596,14 +612,10 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
     makeSymmetricWeigthMat(N, Wt);
     printMatrix(N, Wt);
 
-    switch(option){
-        case 1:
-            drawUnDependenceGraph(hWnd, hdc, N, nn, nx, ny, A, Wt);
-
-            break;
-    }
+    drawUnDependenceGraph(hWnd, hdc, N, nn, nx, ny, A, Wt);
 
     float** matRe = primMST(graph, Wt, nx, ny, nn, hdc);
+    printf("Matrix of Prima`s algorithm:\n");
     printMatrix(N, matRe);
 
     free(nn);
@@ -614,6 +626,7 @@ void mainFunc(int option, HWND hWnd, HDC hdc){
     freeMatrix(B, N);
     freeMatrix(C, N);
     freeMatrix(D, N);
+    freeMatrix(matRe, N);
     destroyGraph(graph);
 }
 
