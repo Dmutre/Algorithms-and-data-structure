@@ -144,6 +144,22 @@ void SetTextSize(HDC hdc, int fontSize) {
     DeleteObject(hFontOld);
 }
 
+void printWeight(HDC hdc, float x, float y, float weight) {
+    int prevFontSize = GetTextSize(hdc);
+
+    SetTextSize(hdc, prevFontSize - 2);
+
+    SetTextColor(hdc, RGB(255, 0, 0));
+
+    char buffer[256];
+    sprintf_s(buffer, sizeof(buffer), "%.1f", weight);
+    TextOut(hdc, x, y, buffer, strlen(buffer));
+
+    SetTextSize(hdc, prevFontSize);
+
+    SetTextColor(hdc, RGB(0, 0, 0));
+}
+
 void drawTransition(HDC hdc, int N, int i, int j, int nx[], int ny[]) {
     int edgeCeil = ceil(N / 4.0);
     int r = 20;
@@ -203,6 +219,28 @@ void drawCircle(HDC hdc, int nx[], int ny[], int i, char** nn){
     TextOut(hdc, nx[i]-dtx,ny[i]-dy/2, nn[i],2);
 }
 
+void drawWeight(HDC hdc, float** Wt, int nx[], int ny[], int i, int j, int N){
+    int changeX, changeY;
+    int edgeCeil = ceil(N / 4.0);
+
+    if(((abs(i-j) >=2 && abs(i-j) <= edgeCeil) || abs(i-j) >= 3*edgeCeil) && (nx[i] == nx[j] || ny[i] == ny[j])){
+        if(nx[i] == nx[j]){
+            changeX = nx[j]+RADIUS-20;
+            changeY = ny[i]-(ny[i]-ny[j])/2;
+            printWeight(hdc, changeX, changeY, Wt[i][j]);
+        } else{
+            printWeight(hdc, nx[j]+(nx[i]-nx[j])/2-20, ny[i]-RADIUS-10, Wt[i][j]);
+        }
+    }
+
+    if(!(((abs(i-j) >=2 && abs(i-j) <= edgeCeil) || abs(i-j) >= 3*edgeCeil) && (nx[i] == nx[j] || ny[i] == ny[j])) && i != j){
+        changeX = (nx[i] + nx[j])/2;
+        changeY = (ny[i] + ny[j])/2;
+        printWeight(hdc, changeX, changeY, Wt[i][j]);
+    }
+
+}
+
 void printVisitedVertex(int src, int dest) {
     printf("Visited edge: %d -> %d\n", (src+1), (dest+1));
 }
@@ -241,7 +279,8 @@ float** primMST(Graph* graph, float** weights, int nx[], int ny[], char** nn, HD
             drawTransition(hdc, graph->numVertices, parent[u], u, nx, ny);
             drawCircle(hdc, nx, ny, parent[u], nn);
             drawCircle(hdc, nx, ny, u, nn);
-            totalWeight += weights[parent[u]][u];  // Додаємо вагу ребра до суми
+            drawWeight(hdc, weights, nx, ny, parent[u], u, graph->numVertices);
+            totalWeight += weights[parent[u]][u];
         }
 
         for (int v = 0; v < numVertices; v++) {
@@ -349,22 +388,6 @@ void arrayY(int N, int* array){//count Y coordinates for graph
     for(int i = edgeCeil*3+1; i < edgeCeil*4 && i < N; i++){
         array[i] = array[i-1]-150;
     }
-}
-
-void printWeight(HDC hdc, float x, float y, float weight) {
-    int prevFontSize = GetTextSize(hdc);
-
-    SetTextSize(hdc, prevFontSize - 2);
-
-    SetTextColor(hdc, RGB(255, 0, 0));
-
-    char buffer[256];
-    sprintf_s(buffer, sizeof(buffer), "%.1f", weight);
-    TextOut(hdc, x, y, buffer, strlen(buffer));
-
-    SetTextSize(hdc, prevFontSize);
-
-    SetTextColor(hdc, RGB(0, 0, 0));
 }
 
 //from received matrix of dependencies, coordinates, names and number of vertex draw undirected graph
