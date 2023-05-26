@@ -257,7 +257,7 @@ void printVisitedVertex(int src, int dest, float weight) {
 
 float** primMST(Graph* graph, float** weights, int nx[], int ny[], char** nn, HDC hdc) {
     int numVertices = graph->numVertices;
-    float totalWeight = 0.0f;  // Змінна для зберігання суми ваг ребер
+    float totalWeight = 0.0f;
 
     float** mst = (float**)malloc(numVertices * sizeof(float*));
     for (int i = 0; i < numVertices; i++) {
